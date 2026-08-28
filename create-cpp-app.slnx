@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/create-cpp-app/create-cpp-app.csproj" />
+  </Folder>
+</Solution>
