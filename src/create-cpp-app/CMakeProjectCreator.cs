@@ -6,9 +6,15 @@ public static class CMakeProjectCreator
     {
         Directory.CreateDirectory(settings.AppDir);
 
+        if (settings.UseIncFolder)
+            Directory.CreateDirectory(settings.IncDir);
+
         WriteRootCMakeLists(settings);
         WriteAppCMakeLists(settings);
         WriteMainCpp(settings);
+
+        if (settings.UseIncFolder)
+            WriteHelloWorldHeader(settings);
     }
 
     private static void WriteRootCMakeLists(CMakeProjectSettings settings)
@@ -21,7 +27,7 @@ set(CMAKE_CXX_STANDARD {settings.CppStandard})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${{CMAKE_SOURCE_DIR}}/bin)
-
+{(settings.UseIncFolder ? "\ninclude_directories(inc)\n" : "")}
 add_subdirectory(src/App)
 ");
     }
@@ -30,6 +36,23 @@ add_subdirectory(src/App)
     {
         File.WriteAllText(Path.Combine(settings.AppDir, "CMakeLists.txt"),
 @"add_executable(App main.cpp)
+");
+    }
+
+    private static void WriteHelloWorldHeader(CMakeProjectSettings settings)
+    {
+        File.WriteAllText(Path.Combine(settings.IncDir, "HelloWorld.h"),
+$@"#ifndef HELLO_WORLD_H
+#define HELLO_WORLD_H
+
+#include <string>
+
+inline std::string HelloWorld()
+{{
+    return ""Hello, World!"";
+}}
+
+#endif // HELLO_WORLD_H
 ");
     }
 

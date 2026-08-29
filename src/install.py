@@ -1,3 +1,4 @@
+import argparse
 import os
 import platform
 import shutil
@@ -81,12 +82,18 @@ def add_to_path():
 
 
 def main():
-    source_dir = os.path.dirname(os.path.abspath(__file__))
+    parser = argparse.ArgumentParser(description="Install create-cpp-app")
+    parser.add_argument(
+        "--source",
+        default=os.path.dirname(os.path.abspath(__file__)),
+        help="Source directory to install from (default: script directory)",
+    )
+    args = parser.parse_args()
 
     print(f"[1/4] Installing create-cpp-app")
 
     clean_install_dir()
-    copy_files(source_dir)
+    copy_files(args.source)
     add_to_path()
 
     print()
