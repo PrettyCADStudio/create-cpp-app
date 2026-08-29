@@ -34,7 +34,7 @@ set(MY_SOURCE_DIR ""${{CMAKE_CURRENT_SOURCE_DIR}}"")
 set(MY_BINARY_DIR ""${{MY_SOURCE_DIR}}/bin"")
 set(MY_BUILD_DIR ""${{MY_SOURCE_DIR}}/build"")
 set(MY_CMAKE_DIR ""${{MY_SOURCE_DIR}}/cmake"")
-{(settings.UseIncFolder ? "set(MY_INC_DIR \"${MY_SOURCE_DIR}/inc\")\ninclude_directories(${MY_INC_DIR})\n" : "")}set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ""${{MY_BINARY_DIR}}"")
+{(settings.UseIncFolder ? "set(MY_INC_DIR \"${MY_SOURCE_DIR}/inc\")\ninclude_directories(${MY_INC_DIR})\n\n" : "")}set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ""${{MY_BINARY_DIR}}"")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ""${{MY_BINARY_DIR}}"")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ""${{MY_BINARY_DIR}}"")
 

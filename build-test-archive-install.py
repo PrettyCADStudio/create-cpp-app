@@ -30,13 +30,17 @@ def run_capture(cmd):
 
 
 def main():
-    print("Step 1/3: Build")
+    print("Step 1/4: Build")
     run([sys.executable, "build.py"])
 
-    print("Step 2/3: Archive")
+    print("Step 2/4: Test")
+    run(["dotnet", "test", "create-cpp-app.slnx", "--verbosity", "normal"])
+    print("All tests passed.\n")
+
+    print("Step 3/4: Archive")
     archive_path = run_capture([sys.executable, "archive.py"])
 
-    print("Step 3/3: Install")
+    print("Step 4/4: Install")
     run([sys.executable, "src/install.py", "--source", archive_path])
 
     print("All steps completed successfully.")
