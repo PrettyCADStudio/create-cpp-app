@@ -11,4 +11,5 @@ public sealed record CMakeProjectSettings
     public string SrcDir => Path.Combine(ProjectDir, "src");
     public string AppDir => Path.Combine(SrcDir, "App");
     public string IncDir => Path.Combine(ProjectDir, "inc");
+    public string CmakeDir => Path.Combine(ProjectDir, "cmake");
 }

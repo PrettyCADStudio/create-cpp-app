@@ -9,9 +9,13 @@ public static class CMakeProjectCreator
         if (settings.UseIncFolder)
             Directory.CreateDirectory(settings.IncDir);
 
+        Directory.CreateDirectory(settings.CmakeDir);
+
         WriteRootCMakeLists(settings);
         WriteAppCMakeLists(settings);
         WriteMainCpp(settings);
+
+        WriteProjectCmake(settings);
 
         if (settings.UseIncFolder)
             WriteHelloWorldHeader(settings);
@@ -26,9 +30,39 @@ project({settings.ProjectName} LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD {settings.CppStandard})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${{CMAKE_SOURCE_DIR}}/bin)
-{(settings.UseIncFolder ? "\ninclude_directories(inc)\n" : "")}
+set(MY_SOURCE_DIR ""${{CMAKE_CURRENT_SOURCE_DIR}}"")
+set(MY_BINARY_DIR ""${{MY_SOURCE_DIR}}/bin"")
+set(MY_BUILD_DIR ""${{MY_SOURCE_DIR}}/build"")
+set(MY_CMAKE_DIR ""${{MY_SOURCE_DIR}}/cmake"")
+{(settings.UseIncFolder ? "set(MY_INC_DIR \"${MY_SOURCE_DIR}/inc\")\ninclude_directories(${MY_INC_DIR})\n" : "")}set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ""${{MY_BINARY_DIR}}"")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ""${{MY_BINARY_DIR}}"")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ""${{MY_BINARY_DIR}}"")
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ""${{MY_BINARY_DIR}}/Debug"")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ""${{MY_BINARY_DIR}}/Release"")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ""${{MY_BINARY_DIR}}/MinSizeRel"")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${{MY_BINARY_DIR}}/RelWithDebInfo"")
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ""${{MY_BINARY_DIR}}/Debug"")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ""${{MY_BINARY_DIR}}/Release"")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL ""${{MY_BINARY_DIR}}/MinSizeRel"")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${{MY_BINARY_DIR}}/RelWithDebInfo"")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ""${{MY_BINARY_DIR}}/Debug"")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ""${{MY_BINARY_DIR}}/Release"")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ""${{MY_BINARY_DIR}}/MinSizeRel"")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${{MY_BINARY_DIR}}/RelWithDebInfo"")
+
+include(${{MY_CMAKE_DIR}}/{settings.ProjectName}.cmake)
+
 add_subdirectory(src/App)
+");
+    }
+
+    private static void WriteProjectCmake(CMakeProjectSettings settings)
+    {
+        File.WriteAllText(Path.Combine(settings.CmakeDir, $"{settings.ProjectName}.cmake"),
+$@"# {settings.ProjectName} cmake functions
 ");
     }
 
