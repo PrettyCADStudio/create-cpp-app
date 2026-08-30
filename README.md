@@ -49,6 +49,18 @@ dotnet run --project src/create-cpp-app/create-cpp-app.csproj
 create-cpp-app
 ```
 
+## 版本信息
+
+```bash
+create-cpp-app --version
+```
+
+输出：
+
+```text
+0.0.1
+```
+
 ## 交互式创建示例
 
 运行后会询问：
