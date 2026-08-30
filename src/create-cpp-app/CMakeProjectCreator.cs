@@ -203,10 +203,10 @@ public static class CMakeProjectCreator
         sb.AppendLine("{");
         if (settings.UseIncFolder)
         {
-            sb.AppendLine("    std::cout << HelloWorld() << std::endl;");
+            sb.AppendLine("    HelloWorld();");
         }
-        sb.AppendLine("    std::cout << GetStaticMessage() << std::endl;");
-        sb.AppendLine("    std::cout << GetDynamicMessage() << std::endl;");
+        sb.AppendLine("    HelloStatic();");
+        sb.AppendLine("    HelloDynamic();");
         sb.AppendLine("    return 0;");
         sb.AppendLine("}");
 
