@@ -1,102 +1,205 @@
 # create-cpp-app
 
-一个用于快速创建 C++ CMake 项目的命令行脚手架工具。通过交互式问答引导你完成项目初始化，自动生成标准化的目录结构和 CMake 配置。
+create-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工具。它会根据用户输入生成可直接构建的项目骨架，并支持静态库、动态库和可执行程序的标准目录结构。
 
-## 功能
+## 功能概览
 
-- 交互式输入项目名称（支持非空校验）
-- 选择 C++ 标准版本（C++17 / C++20，默认 C++17）
-- 自动生成 CMake 项目结构，包含解决方案和可执行目标
-- 输出目录统一设置为项目下的 `bin/` 文件夹
-
-## 生成的项目结构
-
-```
-<项目名>/
-├── CMakeLists.txt          # 解决方案级 CMake 配置
-└── src/
-    └── App/
-        ├── CMakeLists.txt  # App 可执行目标定义
-        └── main.cpp        # 入口源文件
-```
+- 交互式创建新项目
+- 选择 C++ 标准：17 / 20
+- 可选生成 `inc/` 共享头文件目录
+- 自动生成以下结构：
+  - `src/App` 可执行程序
+  - `src/Static` 静态库
+  - `src/Dynamic` 动态库
+  - 顶层 `CMakeLists.txt`
+  - 工程级 `cmake/` 目录
+- 统一输出目录为 `bin/`
+- 提供 build / archive / install / clean / test 脚本
 
 ## 环境要求
 
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/) 或更高版本
-- Python 3（用于构建和打包脚本）
+- .NET 10 SDK 或更高版本
+- Python 3
+- CMake 3.20+
+- 可选：Windows / Linux / macOS
 
-## 快速开始
+## 安装与运行
 
-### 从源码构建
+### 1) 构建当前工具本身
 
 ```bash
-# 编译（默认 Release）
 python build.py
+```
 
-# 编译 Debug 版本
+默认构建 Release 版本，也可以指定 Debug：
+
+```bash
 python build.py --config Debug
+```
 
-# 运行
+### 2) 运行 CLI
+
+```bash
 dotnet run --project src/create-cpp-app/create-cpp-app.csproj
 ```
 
-### 打包与安装
+或直接使用安装后的命令（如果已执行安装脚本）：
 
 ```bash
-# 打包为 zip（输出到 dist/ 目录）
-python archive.py
-
-# 解压后运行安装脚本，将 create-cpp-app 安装到 ~/.create-cpp-app 并配置 PATH
-python install.py
+create-cpp-app
 ```
 
-### 清理构建产物
+## 交互式创建示例
 
-```bash
-# 清理编译中间文件和输出
-python clean.py
+运行后会询问：
 
-# 同时清理 dist 目录
-python clean.py --dist
+```text
+Project name: my-awesome-app
+C++ standard: 17
+Add 'inc' folder for shared headers? (y/N)
 ```
 
-## 使用示例
+生成目录如下：
 
-运行 `create-cpp-app` 后按提示操作：
-
+```text
+my-awesome-app/
+├── CMakeLists.txt
+├── cmake/
+├── inc/                  # 可选
+├── src/
+│   ├── App/
+│   │   ├── CMakeLists.txt
+│   │   └── main.cpp
+│   ├── Dynamic/
+│   │   ├── CMakeLists.txt
+│   │   ├── Private/
+│   │   │   └── DynamicLib.cpp
+│   │   └── Public/
+│   │       ├── DynamicExports.h
+│   │       └── DynamicLib.h
+│   └── Static/
+│       ├── CMakeLists.txt
+│       ├── Private/
+│       │   └── StaticLib.cpp
+│       └── Public/
+│           └── StaticLib.h
+└── bin/                  # 产物输出目录
 ```
-? Project name: my-awesome-app
-? C++ standard: C++17
 
-Project 'my-awesome-app' created at ./my-awesome-app
-  C++ standard: C++17
-  Output directory: bin/
-```
+## 生成的 CMake 项目构建方式
 
-生成后即可使用 CMake 构建：
+进入生成目录后：
 
 ```bash
 cd my-awesome-app
-cmake -B build
-cmake --build build
-./bin/App
+cmake -S . -B build
+cmake --build build --config Release
 ```
 
-## 项目结构（本工具自身）
+运行程序：
 
+```bash
+./bin/Release/App
 ```
+
+在 Windows 下，通常输出到：
+
+```text
+bin\Release\App.exe
+```
+
+## 现成脚本
+
+### 构建脚本
+
+```bash
+python build.py
+```
+
+### 测试脚本
+
+```bash
+python test.py
+```
+
+执行后，会自动运行当前仓库中的单元测试（基于 `dotnet test`）。每次测试运行都会在 `temp/` 下生成一个单独目录：
+
+```text
+temp/test-YYYY-MM-DD-HH-mm-ss/
+```
+
+该目录中保存了本次测试所生成的样例项目及 CMake 构建结果，适合排查项目生成问题。
+
+### 打包脚本
+
+```bash
+python archive.py --zip
+```
+
+默认输出为文件夹归档；如果传入 `--zip`，则生成 zip 包到 `dist/`。
+
+### 安装脚本
+
+```bash
+python src/install.py --source dist/<archive-folder>
+```
+
+此脚本会将程序安装到用户目录下的 `~/.create-cpp-app`，并尝试更新系统 PATH。
+
+### 清理脚本
+
+```bash
+python clean.py
+```
+
+清理 build、obj、bin 及其他中间产物；如果需要额外清理 `dist`：
+
+```bash
+python clean.py --dist
+```
+
+## 本项目自身结构
+
+```text
 create-cpp-app/
-├── build.py                        # 编译脚本
-├── archive.py                      # 打包脚本
-├── clean.py                        # 清理脚本
-├── create-cpp-app.slnx             # .NET 解决方案文件
-└── src/
-    ├── create-cpp-app/             # 主程序
-    │   ├── create-cpp-app.csproj
-    │   └── Program.cs
-    └── install.py                  # 安装脚本（打包到 zip 中）
+├── build.py                     # 构建本工具
+├── test.py                      # 运行单元测试
+├── archive.py                   # 创建发布归档
+├── clean.py                     # 清理中间产物
+├── create-cpp-app.slnx          # .NET 解决方案文件
+├── src/
+│   ├── create-cpp-app/
+│   │   ├── Program.cs
+│   │   ├── UserInteraction.cs
+│   │   ├── CMakeProjectCreator.cs
+│   │   ├── CMakeProjectSettings.cs
+│   │   └── create-cpp-app.csproj
+│   └── install.py               # 安装脚本
+├── test/
+│   ├── create-cpp-app.Tests/
+│   └── fixtures/
+├── temp/                        # 测试输出目录（每次 test.py 运行单独生成）
+├── LICENSE
+├── README.md
+└── .gitignore
 ```
+
+## 开发与测试
+
+```bash
+python test.py
+```
+
+测试逻辑会：
+
+1. 根据 fixture 配置生成示例项目
+2. 检查文件树和文件内容是否匹配 fixture
+3. 真实运行 `cmake -S ... -B ...`
+4. 真实运行 `cmake --build ...`
+5. 仅当所有流程都成功时才视为测试通过
 
 ## 许可证
 
-[MIT](LICENSE) &copy; PrettyCAD Studio
+MIT License
+
+版权：PrettyCAD Studio
