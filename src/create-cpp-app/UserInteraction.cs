@@ -34,6 +34,10 @@ public static class UserInteraction
         Console.WriteLine($"  C++ standard: C++{settings.CppStandard}");
         Console.WriteLine($"  Output directory: bin/");
         if (settings.UseIncFolder)
+        {
             Console.WriteLine($"  Include directory: inc/");
+            Console.WriteLine($"  Static library: src/Static/");
+            Console.WriteLine($"  Dynamic library: src/Dynamic/");
+        }
     }
 }
