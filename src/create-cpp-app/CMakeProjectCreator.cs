@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 
 namespace create_cpp_app;
 
@@ -108,23 +108,22 @@ public static class CMakeProjectCreator
         CreateDynamicCMakeFile(settings);
     }
 
-    private static void CreateDynamicExportFile(CMakeProjectSettings settings)
+        private static void CreateDynamicExportFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
         sb.AppendLine("#pragma once");
         sb.AppendLine();
-        sb.AppendLine("/* Cross-platform export macro */");
         sb.AppendLine("#if defined(_WIN32) || defined(__CYGWIN__)");
-        sb.AppendLine("  #ifdef Dynamic_EXPORTS");
-        sb.AppendLine("    #define DYNAMIC_API __declspec(dllexport)");
-        sb.AppendLine("  #else");sb.AppendLine("    #define DYNAMIC_API __declspec(dllimport)");
-        sb.AppendLine("  #endif");
+        sb.AppendLine("    #ifdef Dynamic_EXPORTS");
+        sb.AppendLine("        #define DYNAMIC_API __declspec(dllexport)");
+        sb.AppendLine("    #else");
+        sb.AppendLine("        #define DYNAMIC_API __declspec(dllimport)");
+        sb.AppendLine("    #endif");
         sb.AppendLine("#elif defined(__GNUC__) && __GNUC__ >= 4");
-        sb.AppendLine("  #define DYNAMIC_API __attribute__ ((visibility (\"default\")))");
+        sb.AppendLine("    #define DYNAMIC_API __attribute__ ((visibility (\"default\")))");
         sb.AppendLine("#else");
-        sb.AppendLine("  #define DYNAMIC_API");
+        sb.AppendLine("    #define DYNAMIC_API");
         sb.AppendLine("#endif");
-
         var path = Path.Combine(settings.DynamicDir, "Public", "DynamicExports.h");
         File.WriteAllText(path, sb.ToString());
     }
@@ -263,8 +262,3 @@ public static class CMakeProjectCreator
         File.WriteAllText(Path.Combine(settings.ProjectDir, "CMakeLists.txt"), sb.ToString());
     }
 }
-
-
-
-
-
