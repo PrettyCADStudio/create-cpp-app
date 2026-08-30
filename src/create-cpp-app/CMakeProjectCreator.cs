@@ -142,17 +142,19 @@ public static class CMakeProjectCreator
         File.WriteAllText(path, sb.ToString());
     }
 
-    private static void CreateDynamicSourceFile(CMakeProjectSettings settings)
+        private static void CreateDynamicSourceFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
         sb.AppendLine("#include \"DynamicLib.h\"");
+        sb.AppendLine();
         sb.AppendLine("#include <iostream>");
         sb.AppendLine();
         sb.AppendLine("void HelloDynamic()");
         sb.AppendLine("{");
         sb.AppendLine("    std::cout << \"Hello Dynamic Library\" << std::endl;");
         sb.AppendLine("}");
-n        var path = Path.Combine(settings.DynamicDir, "Private", "DynamicLib.cpp");
+
+        var path = Path.Combine(settings.DynamicDir, "Private", "DynamicLib.cpp");
         File.WriteAllText(path, sb.ToString());
     }
 
@@ -261,6 +263,7 @@ public static class CMakeProjectCreator
         File.WriteAllText(Path.Combine(settings.ProjectDir, "CMakeLists.txt"), sb.ToString());
     }
 }
+
 
 
 
