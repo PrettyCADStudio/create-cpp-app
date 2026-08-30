@@ -4,6 +4,7 @@ import shutil
 
 CLEAN_DIRS = [
     "bin",
+    "temp",
     os.path.join("src", "create-cpp-app", "obj"),
 ]
 
