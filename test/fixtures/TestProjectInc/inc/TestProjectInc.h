@@ -1,7 +1,8 @@
-#ifndef TESTPROJECTINC_H
-#define TESTPROJECTINC_H
+#pragma once
 
-#include "StaticLib.h"
-#include "DynamicLib.h"
+#include <iostream>
 
-#endif // TESTPROJECTINC_H
+inline void HelloWorld()
+{
+    std::cout << "Hello World" << std::endl;
+}

@@ -1,6 +1,10 @@
 #include <iostream>
+#include "StaticLib.h"
+#include "DynamicLib.h"
 
-int main() {
-    std::cout << "Hello, World!" << std::endl;
+int main()
+{
+    HelloStatic();
+    HelloDynamic();
     return 0;
 }

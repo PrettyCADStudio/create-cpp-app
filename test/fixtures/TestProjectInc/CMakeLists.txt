@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(TestProjectInc LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(MY_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -9,8 +9,6 @@ set(MY_BINARY_DIR "${MY_SOURCE_DIR}/bin")
 set(MY_BUILD_DIR "${MY_SOURCE_DIR}/build")
 set(MY_CMAKE_DIR "${MY_SOURCE_DIR}/cmake")
 set(MY_INC_DIR "${MY_SOURCE_DIR}/inc")
-include_directories(${MY_INC_DIR})
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MY_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MY_BINARY_DIR}")
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MY_BINARY_DIR}")
@@ -32,6 +30,6 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${MY_BINARY_DIR}/RelWithDebIn
 
 include(${MY_CMAKE_DIR}/TestProjectInc.cmake)
 
+add_subdirectory(src/App)
 add_subdirectory(src/Static)
 add_subdirectory(src/Dynamic)
-add_subdirectory(src/App)
