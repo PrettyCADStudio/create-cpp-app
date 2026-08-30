@@ -23,11 +23,11 @@ public static class CMakeProjectCreator
             var sb = new StringBuilder();
             sb.AppendLine("#pragma once");
             sb.AppendLine();
-            sb.AppendLine("#include <iostream>");
+            sb.AppendLine("#include <string>");
             sb.AppendLine();
-            sb.AppendLine("inline void HelloWorld()");
+            sb.AppendLine("inline std::string HelloWorld()");
             sb.AppendLine("{");
-            sb.AppendLine("    std::cout << \"Hello World\" << std::endl;");
+            sb.AppendLine("    return std::string(\"Hello World\");");
             sb.AppendLine("}");
             File.WriteAllText(Path.Combine(settings.IncDir, $"{settings.ProjectName}.h"), sb.ToString());
         }
@@ -62,7 +62,9 @@ public static class CMakeProjectCreator
         var sb = new StringBuilder();
         sb.AppendLine("#pragma once");
         sb.AppendLine();
-        sb.AppendLine("void HelloStatic();");
+        sb.AppendLine("#include <string>");
+        sb.AppendLine();
+        sb.AppendLine("std::string GetStaticMessage();");
 
         var path = Path.Combine(settings.StaticDir, "Public", "StaticLib.h");
         File.WriteAllText(path, sb.ToString());
@@ -72,11 +74,12 @@ public static class CMakeProjectCreator
     {
         var sb = new StringBuilder();
         sb.AppendLine("#include \"StaticLib.h\"");
-        sb.AppendLine("#include <iostream>");
         sb.AppendLine();
-        sb.AppendLine("void HelloStatic()");
+        sb.AppendLine("#include <string>");
+        sb.AppendLine();
+        sb.AppendLine("std::string GetStaticMessage()");
         sb.AppendLine("{");
-        sb.AppendLine("    std::cout << \"Hello Static Library\" << std::endl;");
+        sb.AppendLine("    return std::string(\"Hello Static Library\");");
         sb.AppendLine("}");
 
         var path = Path.Combine(settings.StaticDir, "Private", "StaticLib.cpp");
@@ -113,10 +116,16 @@ public static class CMakeProjectCreator
         var sb = new StringBuilder();
         sb.AppendLine("#pragma once");
         sb.AppendLine();
-        sb.AppendLine("#ifdef Dynamic_EXPORTS");
+        sb.AppendLine("/* Cross-platform export macro */");
+        sb.AppendLine("#if defined(_WIN32) || defined(__CYGWIN__)");
+        sb.AppendLine("  #ifdef Dynamic_EXPORTS");
         sb.AppendLine("    #define DYNAMIC_API __declspec(dllexport)");
+        sb.AppendLine("  #else");.AppendLine("    #define DYNAMIC_API __declspec(dllimport)");
+        sb.AppendLine("  #endif");
+        sb.AppendLine("#elif defined(__GNUC__) && __GNUC__ >= 4");
+        sb.AppendLine("  #define DYNAMIC_API __attribute__ ((visibility (\"default\")))");
         sb.AppendLine("#else");
-        sb.AppendLine("    #define DYNAMIC_API __declspec(dllimport)");
+        sb.AppendLine("  #define DYNAMIC_API");
         sb.AppendLine("#endif");
 
         var path = Path.Combine(settings.DynamicDir, "Public", "DynamicExports.h");
@@ -130,7 +139,9 @@ public static class CMakeProjectCreator
         sb.AppendLine();
         sb.AppendLine("#include \"DynamicExports.h\"");
         sb.AppendLine();
-        sb.AppendLine("DYNAMIC_API void HelloDynamic();");
+        sb.AppendLine("#include <string>");
+        sb.AppendLine();
+        sb.AppendLine("DYNAMIC_API std::string GetDynamicMessage();");
 
         var path = Path.Combine(settings.DynamicDir, "Public", "DynamicLib.h");
         File.WriteAllText(path, sb.ToString());
@@ -141,11 +152,11 @@ public static class CMakeProjectCreator
         var sb = new StringBuilder();
         sb.AppendLine("#include \"DynamicLib.h\"");
         sb.AppendLine();
-        sb.AppendLine("#include <iostream>");
+        sb.AppendLine("#include <string>");
         sb.AppendLine();
-        sb.AppendLine("void HelloDynamic()");
+        sb.AppendLine("std::string GetDynamicMessage()");
         sb.AppendLine("{");
-        sb.AppendLine("    std::cout << \"Hello Dynamic Library\" << std::endl;");
+        sb.AppendLine("    return std::string(\"Hello Dynamic Library\");");
         sb.AppendLine("}");
 
         var path = Path.Combine(settings.DynamicDir, "Private", "DynamicLib.cpp");
@@ -175,7 +186,7 @@ public static class CMakeProjectCreator
         sb.AppendLine("add_executable(App main.cpp)");
         if (settings.UseIncFolder)
         {
-            sb.AppendLine("include_directories(${MY_INC_DIR})");
+            sb.AppendLine("target_include_directories(App PRIVATE ${MY_INC_DIR})");
         }
         sb.AppendLine("target_link_libraries(App PRIVATE Static)");
         sb.AppendLine("target_link_libraries(App PRIVATE Dynamic)");
@@ -199,10 +210,10 @@ public static class CMakeProjectCreator
         sb.AppendLine("{");
         if (settings.UseIncFolder)
         {
-            sb.AppendLine("    HelloWorld();");
+            sb.AppendLine("    std::cout << HelloWorld() << std::endl;");
         }
-        sb.AppendLine("    HelloStatic();");
-        sb.AppendLine("    HelloDynamic();");
+        sb.AppendLine("    std::cout << GetStaticMessage() << std::endl;");
+        sb.AppendLine("    std::cout << GetDynamicMessage() << std::endl;");
         sb.AppendLine("    return 0;");
         sb.AppendLine("}");
 
@@ -219,8 +230,8 @@ public static class CMakeProjectCreator
         sb.AppendLine("set(CMAKE_CXX_STANDARD_REQUIRED ON)");
         sb.AppendLine();
         sb.AppendLine(@"set(MY_SOURCE_DIR ""${CMAKE_CURRENT_SOURCE_DIR}"")");
-        sb.AppendLine(@"set(MY_BINARY_DIR ""${MY_SOURCE_DIR}/bin"")");
-        sb.AppendLine(@"set(MY_BUILD_DIR ""${MY_SOURCE_DIR}/build"")");
+        sb.AppendLine(@"set(MY_BINARY_DIR ""${CMAKE_BINARY_DIR}/bin"")");
+        sb.AppendLine(@"set(MY_BUILD_DIR ""${MY_BINARY_DIR}/build"")");
         sb.AppendLine(@"set(MY_CMAKE_DIR ""${MY_SOURCE_DIR}/cmake"")");
 
         if (settings.UseIncFolder)
