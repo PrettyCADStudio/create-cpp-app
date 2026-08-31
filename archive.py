@@ -1,14 +1,16 @@
 import argparse
 import os
+import platform
 import shutil
 import subprocess
 import sys
 import zipfile
-from datetime import datetime
 
 PROJECT_FILE = os.path.join("src", "create-cpp-app", "create-cpp-app.csproj")
 BUILD_DIR = os.path.join("bin", "Release", "net10.0")
 DIST_DIR = "dist"
+DOCUMENTATION_FILE = os.path.join("docs", "doc.md")
+APPLICATION_NAME = "create-cpp-app"
 
 
 def read_version():
@@ -49,7 +51,32 @@ def collect_files():
     if os.path.isfile(install_script):
         files.append((install_script, "install.py"))
 
+    files.append((DOCUMENTATION_FILE, "doc.md"))
+
     return files
+
+
+def get_platform_name():
+    system_names = {
+        "Darwin": "macos",
+        "Linux": "linux",
+        "Windows": "windows",
+    }
+    system = platform.system()
+    return system_names.get(system, system.lower())
+
+
+def get_architecture_name():
+    architecture_names = {
+        "AMD64": "x64",
+        "arm64": "arm64",
+        "aarch64": "arm64",
+        "i386": "x86",
+        "i686": "x86",
+        "x86_64": "x64",
+    }
+    architecture = platform.machine()
+    return architecture_names.get(architecture, architecture.lower())
 
 
 def archive_zip(name, files):
@@ -82,11 +109,19 @@ def main():
         print("Run 'python build.py' first.", file=sys.stderr)
         sys.exit(1)
 
+    if not os.path.isfile(DOCUMENTATION_FILE):
+        print(
+            f"Error: documentation file not found at {DOCUMENTATION_FILE}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     os.makedirs(DIST_DIR, exist_ok=True)
 
     version = read_version()
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    name = f"{version}-{timestamp}"
+    platform_name = get_platform_name()
+    architecture_name = get_architecture_name()
+    name = f"{APPLICATION_NAME}-v{version}-{platform_name}-{architecture_name}"
     files = collect_files()
 
     if args.zip:

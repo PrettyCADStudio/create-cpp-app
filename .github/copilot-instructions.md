@@ -2,45 +2,43 @@
 
 ## Build, test, and validation commands
 
-Use the repository's actual entry points rather than ad hoc commands:
+Use the repository scripts for normal validation:
 
 ```bash
-# Build the CLI itself
+# Build the CLI (Release by default)
 python build.py
 
-# Build Debug configuration if needed
+# Build the CLI in Debug
 python build.py --config Debug
 
-# Run the full test suite
+# Run every fixture-based test
 python test.py
 
-# Run a single .NET test target
+# Run all fixture cases through the core theory
 dotnet test create-cpp-app.slnx --filter "Create_MatchesFixture"
 
-# Run a single fixture case by name (example)
-dotnet test create-cpp-app.slnx --filter "Name~TestProject"
+# Run one fixture case by its generated project name
+dotnet test create-cpp-app.slnx --filter "Name~TestProjectAllOptions"
 ```
 
-The test runner is intentionally fixture-driven: `test/create-cpp-app.Tests/CMakeProjectCreatorTests.cs` generates sample projects and validates both file content and real CMake configure/build steps.
+There is no separate lint command. Tests require CMake in addition to the .NET SDK because every fixture is configured and built as a generated C++ project.
 
 ## High-level architecture
 
-This repository is a C++ project generator, not a library with a long runtime flow. The main pieces are:
+This is a .NET 10 interactive CLI that generates complete CMake-based C++ project skeletons.
 
-- `src/create-cpp-app/Program.cs`: command-line entry point using `System.CommandLine`
-- `src/create-cpp-app/UserInteraction.cs`: interactive prompts for project name, C++ standard, and `inc` option
-- `src/create-cpp-app/CMakeProjectSettings.cs`: settings model used by the generator
-- `src/create-cpp-app/CMakeProjectCreator.cs`: writes the generated project tree and CMake files
-- `test/create-cpp-app.Tests/CMakeProjectCreatorTests.cs`: end-to-end validation of generated projects
-- `test/fixtures/*`: golden projects used as expected output for generator tests
-
-The generator creates a C++ CMake skeleton with `src/App`, `src/Static`, and `src/Dynamic`, plus optional `inc/` and `cmake/` folders. The tests compare generated output against fixtures and then run `cmake -S ... -B ...` and `cmake --build ...` for each generated project.
+- `Program.cs` defines the `System.CommandLine` root command, including `--force`; the framework supplies `--help` and `--version`.
+- `UserInteraction.cs` collects the project name, C++17/C++20 choice, and optional `inc`, `res`, `3rd`, and `patch` directories.
+- `CMakeProjectSettings.cs` contains the selected options and derives the generated project paths from the current working directory.
+- `CMakeProjectCreator.cs` is the generator. It writes the root CMake file, the App executable, Static and Dynamic libraries, their public/private files, and the selected optional directories.
+- `test/create-cpp-app.Tests/CMakeProjectCreatorTests.cs` discovers every immediate subdirectory in `test/fixtures` that contains `create-cpp-app.json`. It deserializes that configuration, invokes the generator, compares the generated tree and file contents to the fixture, then runs CMake configure and Release build.
 
 ## Project-specific conventions
 
-- Generated C++ code must keep 4-space indentation; do not compress multiline generator output into a single `AppendLine` call.
-- Keep generator output formatting exact, because fixture tests compare file contents literally.
-- If behavior changes, update the corresponding fixture files under `test/fixtures/*` to match the expected generated output.
-- Test artifacts live under `temp/` with timestamped folders named `test-YYYY-MM-DD-HH-mm-ss`; avoid nested duplicate output folders and clean only stale `test-*` directories.
-- The project version is declared in `src/create-cpp-app/create-cpp-app.csproj`; keep version metadata aligned with the CLI `--version` output.
-- The build/test flow is `build.py` -> `python test.py` and should remain the primary validation path for this repo.
+- Add generator scenarios by creating a new `test/fixtures/<case>/create-cpp-app.json` and its complete expected generated tree. Do not add one-off assertion tests for option combinations that fixture discovery can cover.
+- Fixture file comparisons are byte-for-byte at the decoded-text level, excluding only `create-cpp-app.json`; generator formatting, blank lines, and final newlines are therefore part of the contract.
+- Generated files use LF (`\n`) line endings. Preserve this for fixtures and new generator output.
+- Generated C++ source uses four spaces per indentation level. Keep each generated output line in a distinct `AppendLine` call rather than embedding multi-line source text in a single call.
+- Optional `res`, `3rd`, and `patch` directories are represented by empty `.keep` files so fixture comparisons retain them.
+- The test runner writes generated projects and CMake build directories to `temp/test-YYYY-MM-DD-HH-mm-ss/`. Do not rely on artifacts from earlier runs; the test setup removes stale timestamped test directories.
+- Version metadata is defined in `src/create-cpp-app/create-cpp-app.csproj`. Keep `Version`, `AssemblyVersion`, `FileVersion`, and `InformationalVersion` aligned so the built-in CLI `--version` output remains correct.
