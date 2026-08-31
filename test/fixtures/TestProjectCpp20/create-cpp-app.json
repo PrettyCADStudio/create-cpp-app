@@ -1,0 +1,8 @@
+{
+  "projectName": "TestProjectCpp20",
+  "cppStandard": "20",
+  "useIncFolder": false,
+  "useResFolder": false,
+  "useThirdPartyFolder": false,
+  "usePatchFolder": false
+}

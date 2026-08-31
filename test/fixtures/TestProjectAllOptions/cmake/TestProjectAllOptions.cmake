@@ -1,0 +1,1 @@
+# TestProjectAllOptions cmake functions
