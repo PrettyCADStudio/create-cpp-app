@@ -1,13 +1,38 @@
 import argparse
 import os
 import shutil
+import subprocess
 import sys
 import zipfile
 from datetime import datetime
 
-VERSION = "0.0.1"
+PROJECT_FILE = os.path.join("src", "create-cpp-app", "create-cpp-app.csproj")
 BUILD_DIR = os.path.join("bin", "Release", "net10.0")
 DIST_DIR = "dist"
+
+
+def read_version():
+    result = subprocess.run(
+        [
+            "dotnet",
+            "msbuild",
+            PROJECT_FILE,
+            "-nologo",
+            "-getProperty:Version",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        raise RuntimeError(
+            result.stderr.strip() or f"Failed to read Version from {PROJECT_FILE}"
+        )
+
+    version = result.stdout.strip()
+    if not version:
+        raise RuntimeError(f"Version property is empty in {PROJECT_FILE}")
+    return version
 
 
 def collect_files():
@@ -59,8 +84,9 @@ def main():
 
     os.makedirs(DIST_DIR, exist_ok=True)
 
+    version = read_version()
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-    name = f"{VERSION}-{timestamp}"
+    name = f"{version}-{timestamp}"
     files = collect_files()
 
     if args.zip:
