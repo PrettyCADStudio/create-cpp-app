@@ -11,13 +11,19 @@ public static class UserInteraction
 
         var cppStandard = Prompt.Select("C++ standard", new[] { "17", "20" }, defaultValue: "17");
 
-        var useIncFolder = Prompt.Confirm("Add 'inc' folder for shared headers?", defaultValue: false);
+        var useIncFolder = Prompt.Confirm("Create 'inc' folder for shared headers?", defaultValue: false);
+        var useResFolder = Prompt.Confirm("Create 'res' folder for resource files?", defaultValue: false);
+        var useThirdPartyFolder = Prompt.Confirm("Create '3rd' folder for third-party library files in the project?", defaultValue: false);
+        var usePatchFolder = Prompt.Confirm("Create 'patch' folder for patches?", defaultValue: false);
 
         return new CMakeProjectSettings
         {
             ProjectName = projectName,
             CppStandard = cppStandard,
             UseIncFolder = useIncFolder,
+            UseResFolder = useResFolder,
+            UseThirdPartyFolder = useThirdPartyFolder,
+            UsePatchFolder = usePatchFolder,
             Force = false,
         };
     }
@@ -38,6 +44,18 @@ public static class UserInteraction
             Console.WriteLine($"  Include directory: inc/");
             Console.WriteLine($"  Static library: src/Static/");
             Console.WriteLine($"  Dynamic library: src/Dynamic/");
+        }
+        if (settings.UseResFolder)
+        {
+            Console.WriteLine($"  Resource directory: res/");
+        }
+        if (settings.UseThirdPartyFolder)
+        {
+            Console.WriteLine($"  Third-party directory: 3rd/");
+        }
+        if (settings.UsePatchFolder)
+        {
+            Console.WriteLine($"  Patch directory: patch/");
         }
     }
 }

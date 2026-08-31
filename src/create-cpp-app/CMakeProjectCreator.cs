@@ -4,9 +4,26 @@ namespace create_cpp_app;
 
 public static class CMakeProjectCreator
 {
+    private const string DefaultNewLine = "\r\n";
+    private const string CMakeModuleNewLine = "\n";
+
+    private static void AppendLine(StringBuilder sb, string line, string newline = DefaultNewLine)
+    {
+        sb.Append(line);
+        sb.Append(newline);
+    }
+
+    private static void WriteFile(string path, string content)
+    {
+        File.WriteAllText(path, content);
+    }
+
     public static void Create(CMakeProjectSettings settings)
     {
         CreateIncFolder(settings);
+        CreateResFolder(settings);
+        CreateThirdPartyFolder(settings);
+        CreatePatchFolder(settings);
         CreateCMakeFolder(settings);
         CreateStaticProject(settings);
         CreateDynamicProject(settings);
@@ -21,16 +38,49 @@ public static class CMakeProjectCreator
             Directory.CreateDirectory(settings.IncDir);
 
             var sb = new StringBuilder();
-            sb.AppendLine("#pragma once");
-            sb.AppendLine();
-            sb.AppendLine("#include <iostream>");
-            sb.AppendLine();
-            sb.AppendLine("inline void HelloWorld()");
-            sb.AppendLine("{");
-            sb.AppendLine("    std::cout << \"Hello World\" << std::endl;");
-            sb.AppendLine("}");
-            File.WriteAllText(Path.Combine(settings.IncDir, $"{settings.ProjectName}.h"), sb.ToString());
+            AppendLine(sb, "#pragma once");
+            AppendLine(sb, string.Empty);
+            AppendLine(sb, "#include <iostream>");
+            AppendLine(sb, string.Empty);
+            AppendLine(sb, "inline void HelloWorld()");
+            AppendLine(sb, "{");
+            AppendLine(sb, "    std::cout << \"Hello World\" << std::endl;");
+            AppendLine(sb, "}");
+            WriteFile(Path.Combine(settings.IncDir, $"{settings.ProjectName}.h"), sb.ToString());
         }
+    }
+
+    private static void CreateResFolder(CMakeProjectSettings settings)
+    {
+        if (!settings.UseResFolder)
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(settings.ResDir);
+        WriteFile(Path.Combine(settings.ResDir, ".keep"), string.Empty);
+    }
+
+    private static void CreateThirdPartyFolder(CMakeProjectSettings settings)
+    {
+        if (!settings.UseThirdPartyFolder)
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(settings.ThirdPartyDir);
+        WriteFile(Path.Combine(settings.ThirdPartyDir, ".keep"), string.Empty);
+    }
+
+    private static void CreatePatchFolder(CMakeProjectSettings settings)
+    {
+        if (!settings.UsePatchFolder)
+        {
+            return;
+        }
+
+        Directory.CreateDirectory(settings.PatchDir);
+        WriteFile(Path.Combine(settings.PatchDir, ".keep"), string.Empty);
     }
 
     private static void CreateCMakeFolder(CMakeProjectSettings settings)
@@ -38,9 +88,8 @@ public static class CMakeProjectCreator
         Directory.CreateDirectory(settings.CmakeDir);
 
         var sb = new StringBuilder();
-        sb.AppendLine($"# {settings.ProjectName} cmake functions");
-        File.WriteAllText(Path.Combine(settings.CmakeDir, $"{settings.ProjectName}.cmake"), sb.ToString());
-
+        AppendLine(sb, $"# {settings.ProjectName} cmake functions", CMakeModuleNewLine);
+        WriteFile(Path.Combine(settings.CmakeDir, $"{settings.ProjectName}.cmake"), sb.ToString());
     }
 
     private static void CreateStaticProject(CMakeProjectSettings settings)
@@ -60,37 +109,37 @@ public static class CMakeProjectCreator
     private static void CreateStaticHeaderFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("#pragma once");
-        sb.AppendLine();
-        sb.AppendLine("void HelloStatic();");
+        AppendLine(sb, "#pragma once");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "void HelloStatic();");
 
         var path = Path.Combine(settings.StaticDir, "Public", "StaticLib.h");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
     private static void CreateStaticSourceFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("#include \"StaticLib.h\"");
-        sb.AppendLine("#include <iostream>");
-        sb.AppendLine();
-        sb.AppendLine("void HelloStatic()");
-        sb.AppendLine("{");
-        sb.AppendLine("    std::cout << \"Hello Static Library\" << std::endl;");
-        sb.AppendLine("}");
+        AppendLine(sb, "#include \"StaticLib.h\"");
+        AppendLine(sb, "#include <iostream>");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "void HelloStatic()");
+        AppendLine(sb, "{");
+        AppendLine(sb, "    std::cout << \"Hello Static Library\" << std::endl;");
+        AppendLine(sb, "}");
 
         var path = Path.Combine(settings.StaticDir, "Private", "StaticLib.cpp");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
     private static void CreateStaticCMakeFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("add_library(Static STATIC Private/StaticLib.cpp)");
-        sb.AppendLine("target_include_directories(Static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)");
+        AppendLine(sb, "add_library(Static STATIC Private/StaticLib.cpp)");
+        AppendLine(sb, "target_include_directories(Static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)");
 
         var path = Path.Combine(settings.StaticDir, "CMakeLists.txt");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
     private static void CreateDynamicProject(CMakeProjectSettings settings)
@@ -108,63 +157,64 @@ public static class CMakeProjectCreator
         CreateDynamicCMakeFile(settings);
     }
 
-        private static void CreateDynamicExportFile(CMakeProjectSettings settings)
+    private static void CreateDynamicExportFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("#pragma once");
-        sb.AppendLine();
-        sb.AppendLine("#if defined(_WIN32) || defined(__CYGWIN__)");
-        sb.AppendLine("    #ifdef Dynamic_EXPORTS");
-        sb.AppendLine("        #define DYNAMIC_API __declspec(dllexport)");
-        sb.AppendLine("    #else");
-        sb.AppendLine("        #define DYNAMIC_API __declspec(dllimport)");
-        sb.AppendLine("    #endif");
-        sb.AppendLine("#elif defined(__GNUC__) && __GNUC__ >= 4");
-        sb.AppendLine("    #define DYNAMIC_API __attribute__ ((visibility (\"default\")))");
-        sb.AppendLine("#else");
-        sb.AppendLine("    #define DYNAMIC_API");
-        sb.AppendLine("#endif");
+        AppendLine(sb, "#pragma once");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "#if defined(_WIN32) || defined(__CYGWIN__)");
+        AppendLine(sb, "    #ifdef Dynamic_EXPORTS");
+        AppendLine(sb, "        #define DYNAMIC_API __declspec(dllexport)");
+        AppendLine(sb, "    #else");
+        AppendLine(sb, "        #define DYNAMIC_API __declspec(dllimport)");
+        AppendLine(sb, "    #endif");
+        AppendLine(sb, "#elif defined(__GNUC__) && __GNUC__ >= 4");
+        AppendLine(sb, "    #define DYNAMIC_API __attribute__ ((visibility (\"default\")))");
+        AppendLine(sb, "#else");
+        AppendLine(sb, "    #define DYNAMIC_API");
+        AppendLine(sb, "#endif");
+
         var path = Path.Combine(settings.DynamicDir, "Public", "DynamicExports.h");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
     private static void CreateDynamicHeaderFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("#pragma once");
-        sb.AppendLine();
-        sb.AppendLine("#include \"DynamicExports.h\"");
-        sb.AppendLine();
-        sb.AppendLine("DYNAMIC_API void HelloDynamic();");
+        AppendLine(sb, "#pragma once");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "#include \"DynamicExports.h\"");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "DYNAMIC_API void HelloDynamic();");
 
         var path = Path.Combine(settings.DynamicDir, "Public", "DynamicLib.h");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
-        private static void CreateDynamicSourceFile(CMakeProjectSettings settings)
+    private static void CreateDynamicSourceFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("#include \"DynamicLib.h\"");
-        sb.AppendLine();
-        sb.AppendLine("#include <iostream>");
-        sb.AppendLine();
-        sb.AppendLine("void HelloDynamic()");
-        sb.AppendLine("{");
-        sb.AppendLine("    std::cout << \"Hello Dynamic Library\" << std::endl;");
-        sb.AppendLine("}");
+        AppendLine(sb, "#include \"DynamicLib.h\"");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "#include <iostream>");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "void HelloDynamic()");
+        AppendLine(sb, "{");
+        AppendLine(sb, "    std::cout << \"Hello Dynamic Library\" << std::endl;");
+        AppendLine(sb, "}");
 
         var path = Path.Combine(settings.DynamicDir, "Private", "DynamicLib.cpp");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
     private static void CreateDynamicCMakeFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("add_library(Dynamic SHARED Private/DynamicLib.cpp)");
-        sb.AppendLine("target_include_directories(Dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)");
+        AppendLine(sb, "add_library(Dynamic SHARED Private/DynamicLib.cpp)");
+        AppendLine(sb, "target_include_directories(Dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)");
 
         var path = Path.Combine(settings.DynamicDir, "CMakeLists.txt");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
     private static void CreateAppProject(CMakeProjectSettings settings)
@@ -177,88 +227,104 @@ public static class CMakeProjectCreator
     private static void CreateAppCMakeFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("add_executable(App main.cpp)");
+        AppendLine(sb, "add_executable(App main.cpp)");
         if (settings.UseIncFolder)
         {
-            sb.AppendLine("include_directories(${MY_INC_DIR})");
+            AppendLine(sb, "include_directories(${MY_INC_DIR})");
         }
-        sb.AppendLine("target_link_libraries(App PRIVATE Static)");
-        sb.AppendLine("target_link_libraries(App PRIVATE Dynamic)");
+        AppendLine(sb, "target_link_libraries(App PRIVATE Static)");
+        AppendLine(sb, "target_link_libraries(App PRIVATE Dynamic)");
 
         var path = Path.Combine(settings.AppDir, "CMakeLists.txt");
-        File.WriteAllText(path, sb.ToString());
+        WriteFile(path, sb.ToString());
     }
 
     private static void CreateAppMainFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("#include <iostream>");
+        AppendLine(sb, "#include <iostream>");
         if (settings.UseIncFolder)
         {
-            sb.AppendLine($"#include \"{settings.ProjectName}.h\"");
+            AppendLine(sb, $"#include \"{settings.ProjectName}.h\"");
         }
-        sb.AppendLine("#include \"StaticLib.h\"");
-        sb.AppendLine("#include \"DynamicLib.h\"");
-        sb.AppendLine();
-        sb.AppendLine("int main()");
-        sb.AppendLine("{");
+        AppendLine(sb, "#include \"StaticLib.h\"");
+        AppendLine(sb, "#include \"DynamicLib.h\"");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "int main()");
+        AppendLine(sb, "{");
         if (settings.UseIncFolder)
         {
-            sb.AppendLine("    HelloWorld();");
+            AppendLine(sb, "    HelloWorld();");
         }
-        sb.AppendLine("    HelloStatic();");
-        sb.AppendLine("    HelloDynamic();");
-        sb.AppendLine("    return 0;");
-        sb.AppendLine("}");
+        AppendLine(sb, "    HelloStatic();");
+        AppendLine(sb, "    HelloDynamic();");
+        AppendLine(sb, "    return 0;");
+        AppendLine(sb, "}");
 
-        File.WriteAllText(Path.Combine(settings.AppDir, "main.cpp"), sb.ToString());
+        WriteFile(Path.Combine(settings.AppDir, "main.cpp"), sb.ToString());
     }
 
     private static void CreateSolutionCMakeFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("cmake_minimum_required(VERSION 3.20)");
-        sb.AppendLine($"project({settings.ProjectName} LANGUAGES CXX)");
-        sb.AppendLine();
-        sb.AppendLine($"set(CMAKE_CXX_STANDARD {settings.CppStandard})");
-        sb.AppendLine("set(CMAKE_CXX_STANDARD_REQUIRED ON)");
-        sb.AppendLine();
-        sb.AppendLine(@"set(MY_SOURCE_DIR ""${CMAKE_CURRENT_SOURCE_DIR}"")");
-        sb.AppendLine(@"set(MY_BINARY_DIR ""${MY_SOURCE_DIR}/bin"")");
-        sb.AppendLine(@"set(MY_BUILD_DIR ""${MY_SOURCE_DIR}/build"")");
-        sb.AppendLine(@"set(MY_CMAKE_DIR ""${MY_SOURCE_DIR}/cmake"")");
+        AppendLine(sb, "cmake_minimum_required(VERSION 3.20)");
+        AppendLine(sb, $"project({settings.ProjectName} LANGUAGES CXX)");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, $"set(CMAKE_CXX_STANDARD {settings.CppStandard})");
+        AppendLine(sb, "set(CMAKE_CXX_STANDARD_REQUIRED ON)");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, @"set(MY_REPO_DIR ""${CMAKE_CURRENT_SOURCE_DIR}"")");
+        AppendLine(sb, @"set(MY_SRC_DIR ""${MY_REPO_DIR}/src"")");
+        AppendLine(sb, @"set(MY_BINARY_DIR ""${MY_REPO_DIR}/bin"")");
+        AppendLine(sb, @"set(MY_BUILD_DIR ""${MY_REPO_DIR}/build"")");
+        AppendLine(sb, @"set(MY_CMAKE_DIR ""${MY_REPO_DIR}/cmake"")");
 
         if (settings.UseIncFolder)
         {
-            sb.AppendLine(@"set(MY_INC_DIR ""${MY_SOURCE_DIR}/inc"")");
+            AppendLine(sb, @"set(MY_INC_DIR ""${MY_REPO_DIR}/inc"")");
         }
 
-        sb.AppendLine(@"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");
-        sb.AppendLine(@"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");
-        sb.AppendLine(@"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");
-        sb.AppendLine();
-        sb.AppendLine(@"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ""${MY_BINARY_DIR}/Debug"")");
-        sb.AppendLine(@"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ""${MY_BINARY_DIR}/Release"")");
-        sb.AppendLine(@"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ""${MY_BINARY_DIR}/MinSizeRel"")");
-        sb.AppendLine(@"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${MY_BINARY_DIR}/RelWithDebInfo"")");
-        sb.AppendLine();
-        sb.AppendLine(@"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ""${MY_BINARY_DIR}/Debug"")");
-        sb.AppendLine(@"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ""${MY_BINARY_DIR}/Release"")");
-        sb.AppendLine(@"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL ""${MY_BINARY_DIR}/MinSizeRel"")");
-        sb.AppendLine(@"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${MY_BINARY_DIR}/RelWithDebInfo"")");
-        sb.AppendLine();
-        sb.AppendLine(@"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ""${MY_BINARY_DIR}/Debug"")");
-        sb.AppendLine(@"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ""${MY_BINARY_DIR}/Release"")");
-        sb.AppendLine(@"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ""${MY_BINARY_DIR}/MinSizeRel"")");
-        sb.AppendLine(@"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${MY_BINARY_DIR}/RelWithDebInfo"")");
-        sb.AppendLine();
-        sb.AppendLine($"include(${{MY_CMAKE_DIR}}/{settings.ProjectName}.cmake)");
-        sb.AppendLine();
+        if (settings.UseResFolder)
+        {
+            AppendLine(sb, @"set(MY_RES_DIR ""${MY_REPO_DIR}/res"")");
+        }
 
-        sb.AppendLine("add_subdirectory(src/App)");
-        sb.AppendLine("add_subdirectory(src/Static)");
-        sb.AppendLine("add_subdirectory(src/Dynamic)");
+        if (settings.UseThirdPartyFolder)
+        {
+            AppendLine(sb, @"set(MY_3RD_DIR ""${MY_REPO_DIR}/3rd"")");
+        }
 
-        File.WriteAllText(Path.Combine(settings.ProjectDir, "CMakeLists.txt"), sb.ToString());
+        if (settings.UsePatchFolder)
+        {
+            AppendLine(sb, @"set(MY_PATCH_DIR ""${MY_REPO_DIR}/patch"")");
+        }
+
+        AppendLine(sb, @"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");
+        AppendLine(sb, @"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");
+        AppendLine(sb, @"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, @"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ""${MY_BINARY_DIR}/Debug"")");
+        AppendLine(sb, @"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ""${MY_BINARY_DIR}/Release"")");
+        AppendLine(sb, @"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ""${MY_BINARY_DIR}/MinSizeRel"")");
+        AppendLine(sb, @"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${MY_BINARY_DIR}/RelWithDebInfo"")");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, @"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ""${MY_BINARY_DIR}/Debug"")");
+        AppendLine(sb, @"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ""${MY_BINARY_DIR}/Release"")");
+        AppendLine(sb, @"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_MINSIZEREL ""${MY_BINARY_DIR}/MinSizeRel"")");
+        AppendLine(sb, @"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${MY_BINARY_DIR}/RelWithDebInfo"")");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, @"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ""${MY_BINARY_DIR}/Debug"")");
+        AppendLine(sb, @"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ""${MY_BINARY_DIR}/Release"")");
+        AppendLine(sb, @"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_MINSIZEREL ""${MY_BINARY_DIR}/MinSizeRel"")");
+        AppendLine(sb, @"set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ""${MY_BINARY_DIR}/RelWithDebInfo"")");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, $"include(${{MY_CMAKE_DIR}}/{settings.ProjectName}.cmake)");
+        AppendLine(sb, string.Empty);
+
+        AppendLine(sb, "add_subdirectory(src/App)");
+        AppendLine(sb, "add_subdirectory(src/Static)");
+        AppendLine(sb, "add_subdirectory(src/Dynamic)");
+
+        WriteFile(Path.Combine(settings.ProjectDir, "CMakeLists.txt"), sb.ToString());
     }
 }
