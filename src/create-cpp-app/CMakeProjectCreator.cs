@@ -4,10 +4,9 @@ namespace create_cpp_app;
 
 public static class CMakeProjectCreator
 {
-    private const string DefaultNewLine = "\r\n";
-    private const string CMakeModuleNewLine = "\n";
+    private const string NewLine = "\n";
 
-    private static void AppendLine(StringBuilder sb, string line, string newline = DefaultNewLine)
+    private static void AppendLine(StringBuilder sb, string line, string newline = NewLine)
     {
         sb.Append(line);
         sb.Append(newline);
@@ -88,7 +87,7 @@ public static class CMakeProjectCreator
         Directory.CreateDirectory(settings.CmakeDir);
 
         var sb = new StringBuilder();
-        AppendLine(sb, $"# {settings.ProjectName} cmake functions", CMakeModuleNewLine);
+        AppendLine(sb, $"# {settings.ProjectName} cmake functions");
         WriteFile(Path.Combine(settings.CmakeDir, $"{settings.ProjectName}.cmake"), sb.ToString());
     }
 
