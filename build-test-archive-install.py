@@ -26,7 +26,13 @@ def run_capture(cmd):
     if result.stderr:
         print(result.stderr, end="")
     print()
-    return result.stdout.strip()
+    # Commands that produce a machine-readable result must print it as their
+    # final stdout line. Keep this resilient to incidental informational output.
+    lines = [line for line in result.stdout.splitlines() if line.strip()]
+    if not lines:
+        print("Command produced no output.", file=sys.stderr)
+        sys.exit(1)
+    return lines[-1]
 
 
 def main():

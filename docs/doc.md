@@ -32,7 +32,7 @@ create-cpp-app --help
 
 ## 从发布包安装
 
-GitHub Release 中的 ZIP 包包含可执行程序、运行所需文件、`doc.md` 和 `install.py`。下载与解压适用于当前操作系统和架构的归档文件后，在解压目录中执行安装脚本：
+GitHub Release 中的 ZIP 包是针对对应操作系统和架构生成的自包含发布包，包含可执行程序、运行所需文件、`doc.md` 和 `install.py`，无需预先安装 .NET runtime。下载与解压适用于当前操作系统和架构的归档文件后，在解压目录中执行安装脚本：
 
 ```bash
 python install.py
@@ -48,8 +48,8 @@ create-cpp-app-v0.0.1-windows-x64.zip
 
 `install.py` 会执行以下操作：
 
-1. 删除已有的 `~/.create-cpp-app` 安装目录（如果存在）；
-2. 将发布包中的程序文件复制到 `~/.create-cpp-app`；
+1. 验证发布包，并先将程序文件复制到同一磁盘的临时目录；
+2. 成功后将已有的 `~/.create-cpp-app` 备份并替换为新版本；
 3. 将该安装目录添加到当前用户的 `PATH`。
 
 因此，重新运行安装脚本会覆盖旧版本。请勿将其他个人文件保存在 `~/.create-cpp-app` 中。

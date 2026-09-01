@@ -19,6 +19,9 @@ public static class CMakeProjectCreator
 
     public static void Create(CMakeProjectSettings settings)
     {
+        ArgumentNullException.ThrowIfNull(settings);
+        settings.Validate();
+
         CreateIncFolder(settings);
         CreateResFolder(settings);
         CreateThirdPartyFolder(settings);

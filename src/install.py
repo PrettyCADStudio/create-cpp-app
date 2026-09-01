@@ -3,31 +3,53 @@ import os
 import platform
 import shutil
 import sys
+import tempfile
+import uuid
 
 INSTALL_DIR = os.path.join(os.path.expanduser("~"), ".create-cpp-app")
 
 
-def clean_install_dir():
-    if os.path.exists(INSTALL_DIR):
-        print(f"[2/4] Removing old installation at {INSTALL_DIR}")
-        shutil.rmtree(INSTALL_DIR)
-    else:
-        print(f"[2/4] No existing installation found")
+def validate_source(source_dir):
+    if not os.path.isdir(source_dir):
+        raise ValueError(f"Source directory does not exist: {source_dir}")
+    if not os.listdir(source_dir):
+        raise ValueError(f"Source directory is empty: {source_dir}")
 
 
-def copy_files(source_dir):
-    print(f"[3/4] Copying files to {INSTALL_DIR}")
-    os.makedirs(INSTALL_DIR, exist_ok=True)
+def copy_files(source_dir, destination_dir):
+    os.makedirs(destination_dir, exist_ok=True)
 
     for name in os.listdir(source_dir):
         if name == "install.py":
             continue
         src = os.path.join(source_dir, name)
-        dst = os.path.join(INSTALL_DIR, name)
+        dst = os.path.join(destination_dir, name)
         if os.path.isdir(src):
             shutil.copytree(src, dst)
         else:
             shutil.copy2(src, dst)
+
+
+def replace_installation(staging_dir):
+    parent_dir = os.path.dirname(INSTALL_DIR)
+    backup_dir = os.path.join(parent_dir, f".create-cpp-app.backup-{uuid.uuid4().hex}")
+    had_previous_installation = os.path.exists(INSTALL_DIR)
+
+    try:
+        if had_previous_installation:
+            print(f"[3/4] Backing up existing installation at {INSTALL_DIR}")
+            os.replace(INSTALL_DIR, backup_dir)
+        else:
+            print("[3/4] No existing installation found")
+
+        os.replace(staging_dir, INSTALL_DIR)
+    except Exception:
+        if had_previous_installation and os.path.exists(backup_dir) and not os.path.exists(INSTALL_DIR):
+            os.replace(backup_dir, INSTALL_DIR)
+        raise
+    else:
+        if os.path.exists(backup_dir):
+            shutil.rmtree(backup_dir)
 
 
 def add_to_path():
@@ -36,19 +58,21 @@ def add_to_path():
     system = platform.system()
 
     if system == "Windows":
-        import subprocess
-        current = subprocess.check_output(
-            ["powershell", "-Command", "[Environment]::GetEnvironmentVariable('Path','User')"],
-            text=True,
-        ).strip()
-        if INSTALL_DIR not in current:
-            new_path = current + ";" + INSTALL_DIR if current else INSTALL_DIR
-            subprocess.run(
-                ["powershell", "-Command",
-                 f"[Environment]::SetEnvironmentVariable('Path','{new_path}','User')"],
-                check=True,
-            )
-        print(f"  Windows: added to User PATH (restart terminal to take effect)")
+        import winreg
+
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment", 0, winreg.KEY_READ | winreg.KEY_WRITE) as key:
+            try:
+                current, value_type = winreg.QueryValueEx(key, "Path")
+            except FileNotFoundError:
+                current, value_type = "", winreg.REG_EXPAND_SZ
+
+            existing_paths = {os.path.normcase(os.path.normpath(item)) for item in current.split(";") if item}
+            if os.path.normcase(os.path.normpath(INSTALL_DIR)) not in existing_paths:
+                new_path = current + ";" + INSTALL_DIR if current else INSTALL_DIR
+                winreg.SetValueEx(key, "Path", 0, value_type, new_path)
+                print("  Windows: added to User PATH (restart terminal to take effect)")
+            else:
+                print("  Windows: already in User PATH")
         return
 
     shell = os.path.basename(os.environ.get("SHELL", ""))
@@ -90,10 +114,24 @@ def main():
     )
     args = parser.parse_args()
 
-    print(f"[1/4] Installing create-cpp-app")
+    source_dir = os.path.abspath(args.source)
+    try:
+        validate_source(source_dir)
+    except ValueError as error:
+        parser.error(str(error))
 
-    clean_install_dir()
-    copy_files(args.source)
+    print(f"[1/4] Validated source: {source_dir}")
+    parent_dir = os.path.dirname(INSTALL_DIR)
+    os.makedirs(parent_dir, exist_ok=True)
+    staging_dir = tempfile.mkdtemp(prefix=".create-cpp-app.staging-", dir=parent_dir)
+    try:
+        print(f"[2/4] Copying files to temporary directory")
+        copy_files(source_dir, staging_dir)
+        replace_installation(staging_dir)
+    except Exception:
+        if os.path.exists(staging_dir):
+            shutil.rmtree(staging_dir)
+        raise
     add_to_path()
 
     print()

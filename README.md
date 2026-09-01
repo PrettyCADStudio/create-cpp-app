@@ -134,13 +134,7 @@ python build.py
 python test.py
 ```
 
-执行后，会自动运行当前仓库中的单元测试（基于 `dotnet test`）。每次测试运行都会在 `temp/` 下生成一个单独目录：
-
-```text
-temp/test-YYYY-MM-DD-HH-mm-ss/
-```
-
-该目录中保存了本次测试所生成的样例项目及 CMake 构建结果，适合排查项目生成问题。
+执行后，会自动运行当前仓库中的单元测试（基于 `dotnet test`）。测试在系统临时目录中创建独占的随机目录，并在完成后清理；它不会删除仓库内的用户文件。
 
 ### 打包脚本
 
@@ -156,7 +150,7 @@ python archive.py --zip
 python src/install.py --source dist/<archive-folder>
 ```
 
-此脚本会将程序安装到用户目录下的 `~/.create-cpp-app`，并尝试更新系统 PATH。
+此脚本会先在临时目录验证并复制发布包，成功后再替换用户目录下的 `~/.create-cpp-app`，并尝试更新系统 PATH。
 
 ### 清理脚本
 
@@ -190,7 +184,6 @@ create-cpp-app/
 ├── test/
 │   ├── create-cpp-app.Tests/
 │   └── fixtures/
-├── temp/                        # 测试输出目录（每次 test.py 运行单独生成）
 ├── LICENSE
 ├── README.md
 └── .gitignore

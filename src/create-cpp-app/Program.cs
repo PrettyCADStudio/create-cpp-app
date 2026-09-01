@@ -28,6 +28,7 @@ public static class Program
     private static void Run(bool force)
     {
         var settings = UserInteraction.PromptSettings() with { Force = force };
+        settings.Validate();
 
         if (Directory.Exists(settings.ProjectDir))
         {

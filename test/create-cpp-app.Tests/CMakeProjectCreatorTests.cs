@@ -7,45 +7,23 @@ namespace create_cpp_app.Tests;
 public class CMakeProjectCreatorTests : IDisposable
 {
     private static readonly string _projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-    private static readonly string _tempRoot = Path.Combine(_projectRoot, "temp");
-    private static readonly string _runDir = Path.Combine(_tempRoot, $"test-{DateTime.Now:yyyy-MM-dd-HH-mm-ss}");
+    private readonly string _runDir = Path.Combine(Path.GetTempPath(), "create-cpp-app-tests", Guid.NewGuid().ToString("N"));
 
     private readonly string _fixturesDir;
-    private readonly string _originalCurrentDir;
     private const string ConfigFileName = "create-cpp-app.json";
 
     public CMakeProjectCreatorTests()
     {
-        _originalCurrentDir = Directory.GetCurrentDirectory();
         _fixturesDir = Path.Combine(_projectRoot, "test", "fixtures");
-
-        Directory.CreateDirectory(_tempRoot);
-
-        foreach (var legacyDir in Directory.EnumerateDirectories(_tempRoot))
-        {
-            var dirName = Path.GetFileName(legacyDir);
-            if (!dirName.StartsWith("test-", StringComparison.OrdinalIgnoreCase))
-            {
-                Directory.Delete(legacyDir, recursive: true);
-            }
-        }
-
-        foreach (var legacyDir in Directory.EnumerateDirectories(_tempRoot))
-        {
-            var dirName = Path.GetFileName(legacyDir);
-            if (dirName.StartsWith("test-", StringComparison.OrdinalIgnoreCase) && !string.Equals(dirName, Path.GetFileName(_runDir), StringComparison.OrdinalIgnoreCase))
-            {
-                Directory.Delete(legacyDir, recursive: true);
-            }
-        }
-
         Directory.CreateDirectory(_runDir);
-        Directory.SetCurrentDirectory(_runDir);
     }
 
     public void Dispose()
     {
-        Directory.SetCurrentDirectory(_originalCurrentDir);
+        if (Directory.Exists(_runDir))
+        {
+            Directory.Delete(_runDir, recursive: true);
+        }
     }
 
     public static IEnumerable<object[]> GetFixtureCases()
@@ -92,6 +70,7 @@ public class CMakeProjectCreatorTests : IDisposable
             UseThirdPartyFolder = config.UseThirdPartyFolder,
             UsePatchFolder = config.UsePatchFolder,
             Force = false,
+            OutputDirectory = _runDir,
         };
 
         CMakeProjectCreator.Create(settings);
@@ -101,6 +80,28 @@ public class CMakeProjectCreatorTests : IDisposable
         AssertCMakeProjectBuilds(generatedDir);
 
         Console.WriteLine($"[Test] Result:  PASSED");
+    }
+
+    [Theory]
+    [InlineData("..")]
+    [InlineData("nested/project")]
+    [InlineData("name with spaces")]
+    [InlineData("name;set(EVIL ON)")]
+    public void Create_RejectsUnsafeProjectName(string projectName)
+    {
+        var settings = new CMakeProjectSettings
+        {
+            ProjectName = projectName,
+            CppStandard = "17",
+            UseIncFolder = false,
+            UseResFolder = false,
+            UseThirdPartyFolder = false,
+            UsePatchFolder = false,
+            Force = false,
+            OutputDirectory = _runDir,
+        };
+
+        Assert.Throws<ArgumentException>(() => CMakeProjectCreator.Create(settings));
     }
 
     private static void AssertDirectoriesEqual(string expectedDir, string actualDir)

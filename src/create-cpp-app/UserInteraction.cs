@@ -4,10 +4,12 @@ namespace create_cpp_app;
 
 public static class UserInteraction
 {
+    private const string ProjectNamePattern = "^[A-Za-z_][A-Za-z0-9_-]*$";
+    private const string ProjectNameRequirement = "Project name must start with a letter or underscore and may contain only letters, digits, underscores, and hyphens.";
+
     public static CMakeProjectSettings PromptSettings()
     {
-        var projectName = Prompt.Input<string>("Project name",
-            validators: new[] { Validators.Required() });
+        var projectName = PromptProjectName();
 
         var cppStandard = Prompt.Select("C++ standard", new[] { "17", "20" }, defaultValue: "17");
 
@@ -26,6 +28,20 @@ public static class UserInteraction
             UsePatchFolder = usePatchFolder,
             Force = false,
         };
+    }
+
+    private static string PromptProjectName()
+    {
+        while (true)
+        {
+            var projectName = Prompt.Input<string>("Project name", validators: new[] { Validators.Required() });
+            if (System.Text.RegularExpressions.Regex.IsMatch(projectName, ProjectNamePattern))
+            {
+                return projectName;
+            }
+
+            Console.WriteLine(ProjectNameRequirement);
+        }
     }
 
     public static bool ConfirmOverwrite(string projectName)
