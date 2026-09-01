@@ -1,5 +1,12 @@
 namespace create_cpp_app;
 
+public enum PythonScriptMode
+{
+    None,
+    Direct,
+    Pipenv,
+}
+
 public sealed record CMakeProjectSettings
 {
     public required string ProjectName { get; init; }
@@ -9,6 +16,7 @@ public sealed record CMakeProjectSettings
     public required bool UseThirdPartyFolder { get; init; }
     public required bool UsePatchFolder { get; init; }
     public required bool Force { get; init; }
+    public PythonScriptMode PythonScripts { get; init; } = PythonScriptMode.None;
 
     // This is primarily useful to callers embedding the generator (including tests).
     // The CLI intentionally leaves it at the process working directory.

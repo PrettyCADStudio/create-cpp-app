@@ -74,12 +74,13 @@ create-cpp-app
 
 工具会依次要求输入以下信息：
 
-1. **项目名称**：不能为空，且会作为新建项目目录和 CMake 项目名称。
+1. **项目名称**：会作为新建项目目录和 CMake 项目名称；必须以英文字母或下划线开头，后续只能使用英文字母、数字、下划线或连字符。
 2. **C++ 标准**：可选择 C++17 或 C++20，默认是 C++17。
 3. **共享头文件目录**：是否创建 `inc/`。
 4. **资源目录**：是否创建 `res/`。
 5. **第三方库目录**：是否创建 `3rd/`。
 6. **补丁目录**：是否创建 `patch/`。
+7. **Python 开发辅助脚本**：选择不使用（默认）、直接使用 Python 脚本，或使用 Pipenv 运行脚本。
 
 示例：
 
@@ -151,6 +152,8 @@ my-app/
 
 未选择的 `inc/`、`res/`、`3rd/` 和 `patch/` 目录不会生成。
 
+选择直接使用 Python 脚本时，项目根目录还会生成 `mksln.py`、`build.py`、`install.py`、`build-install.py` 和 `archive.py`。选择 Pipenv 时，它们位于 `scripts/`，根目录会额外生成 `Pipfile`。
+
 ## 生成内容说明
 
 ### App
@@ -177,6 +180,9 @@ my-app/
 - 将可执行文件、动态库和静态库的输出目录设置为 `bin/`；
 - 为 Debug、Release、MinSizeRel 和 RelWithDebInfo 分别设置输出子目录；
 - 引入 `cmake/<项目名>.cmake` 作为项目自定义 CMake 模块的入口。
+- 自动搜索并添加 `src/` 下包含 `CMakeLists.txt` 的子项目；新增项目目录后无需修改根 `CMakeLists.txt`。
+- 提供 `define_executable`、`define_static_library`、`define_shared_library` 与 `link_internal_projects`，子项目只需声明项目类型和依赖。
+- 自动收集可安装的可执行程序、静态库、动态库和模块库；调用 `cmake --install` 时，运行时产物安装到 `bin/`，库安装到 `lib/`。
 
 ## 构建生成的项目
 
@@ -203,6 +209,30 @@ bin/App
 ```
 
 生成路径会随所使用的 CMake 生成器和构建配置变化。
+
+## 使用生成的 Python 开发脚本
+
+脚本模式需要 Python 3 和 CMake。直接 Python 模式在项目根目录运行：
+
+```bash
+python mksln.py
+python build.py --config Release
+python install.py --config Release --prefix install
+python build-install.py --config Release
+python archive.py --config Release
+```
+
+`install.py` 默认将内容安装到 `<项目目录>/install`；可通过 `--prefix` 覆盖。`archive.py` 会先编译项目，再将 `bin/` 打包到 `dist/`。
+
+Pipenv 模式使用根目录 `Pipfile` 定义的快捷命令：
+
+```bash
+pipenv run mksln
+pipenv run build --config Release
+pipenv run install --config Release --prefix install
+pipenv run build-install --config Release
+pipenv run archive --config Release
+```
 
 ## 自定义项目
 

@@ -17,6 +17,15 @@ public static class UserInteraction
         var useResFolder = Prompt.Confirm("Create 'res' folder for resource files?", defaultValue: false);
         var useThirdPartyFolder = Prompt.Confirm("Create '3rd' folder for third-party library files in the project?", defaultValue: false);
         var usePatchFolder = Prompt.Confirm("Create 'patch' folder for patches?", defaultValue: false);
+        var pythonScripts = Prompt.Select(
+            "Python development scripts",
+            new[] { "Do not use Python scripts", "Use Python scripts directly", "Use Pipenv" },
+            defaultValue: "Do not use Python scripts") switch
+        {
+            "Use Python scripts directly" => PythonScriptMode.Direct,
+            "Use Pipenv" => PythonScriptMode.Pipenv,
+            _ => PythonScriptMode.None,
+        };
 
         return new CMakeProjectSettings
         {
@@ -26,6 +35,7 @@ public static class UserInteraction
             UseResFolder = useResFolder,
             UseThirdPartyFolder = useThirdPartyFolder,
             UsePatchFolder = usePatchFolder,
+            PythonScripts = pythonScripts,
             Force = false,
         };
     }
@@ -72,6 +82,10 @@ public static class UserInteraction
         if (settings.UsePatchFolder)
         {
             Console.WriteLine($"  Patch directory: patch/");
+        }
+        if (settings.PythonScripts != PythonScriptMode.None)
+        {
+            Console.WriteLine($"  Python scripts: {settings.PythonScripts}");
         }
     }
 }

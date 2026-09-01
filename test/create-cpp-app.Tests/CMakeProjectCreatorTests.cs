@@ -104,6 +104,43 @@ public class CMakeProjectCreatorTests : IDisposable
         Assert.Throws<ArgumentException>(() => CMakeProjectCreator.Create(settings));
     }
 
+    [Theory]
+    [InlineData(PythonScriptMode.Direct)]
+    [InlineData(PythonScriptMode.Pipenv)]
+    public void Create_GeneratesRequestedPythonDevelopmentScripts(PythonScriptMode scriptMode)
+    {
+        var projectName = $"PythonScripts{scriptMode}";
+        var settings = new CMakeProjectSettings
+        {
+            ProjectName = projectName,
+            CppStandard = "17",
+            UseIncFolder = false,
+            UseResFolder = false,
+            UseThirdPartyFolder = false,
+            UsePatchFolder = false,
+            Force = false,
+            PythonScripts = scriptMode,
+            OutputDirectory = _runDir,
+        };
+
+        CMakeProjectCreator.Create(settings);
+
+        var projectDir = Path.Combine(_runDir, projectName);
+        var scriptDir = scriptMode == PythonScriptMode.Pipenv
+            ? Path.Combine(projectDir, "scripts")
+            : projectDir;
+        foreach (var scriptName in new[] { "mksln.py", "build.py", "install.py", "build-install.py", "archive.py" })
+        {
+            Assert.True(File.Exists(Path.Combine(scriptDir, scriptName)), $"Missing {scriptName}");
+        }
+
+        Assert.Equal(scriptMode == PythonScriptMode.Pipenv, File.Exists(Path.Combine(projectDir, "Pipfile")));
+        if (scriptMode == PythonScriptMode.Pipenv)
+        {
+            Assert.Contains("build-install = \"python scripts/build-install.py\"", File.ReadAllText(Path.Combine(projectDir, "Pipfile")));
+        }
+    }
+
     private static void AssertDirectoriesEqual(string expectedDir, string actualDir)
     {
         var expectedFiles = GetRelativeFiles(expectedDir);
@@ -118,7 +155,7 @@ public class CMakeProjectCreatorTests : IDisposable
             var actualLines = File.ReadAllLines(Path.Combine(actualDir, relativePath));
 
             Assert.True(expectedLines.SequenceEqual(actualLines),
-                $"Content mismatch: {relativePath}");
+                $"Content mismatch: {relativePath}\nExpected:\n{string.Join("\n", expectedLines)}\nActual:\n{string.Join("\n", actualLines)}");
         }
     }
 

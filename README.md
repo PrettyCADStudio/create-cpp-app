@@ -12,7 +12,9 @@ create-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工�
   - `src/Static` 静态库
   - `src/Dynamic` 动态库
   - 顶层 `CMakeLists.txt`
-  - 工程级 `cmake/` 目录
+- 工程级 `cmake/` 目录
+- 自动发现 `src/` 下的 CMake 子项目，并提供统一的可执行程序、静态库和动态库定义函数
+- 可选生成 Python 开发脚本，支持直接运行或通过 Pipenv 命令运行
 - 统一输出目录为 `bin/`
 - 提供 build / archive / install / clean / test 脚本
 
@@ -77,6 +79,7 @@ Add 'inc' folder for shared headers? (y/N)
 my-awesome-app/
 ├── CMakeLists.txt
 ├── cmake/
+│   └── my-awesome-app.cmake
 ├── inc/                  # 可选
 ├── src/
 │   ├── App/
@@ -98,6 +101,8 @@ my-awesome-app/
 └── bin/                  # 产物输出目录
 ```
 
+选择 Python 脚本开发辅助时，还会生成 `mksln.py`、`build.py`、`install.py`、`build-install.py` 和 `archive.py`。直接运行模式将它们放在项目根目录；Pipenv 模式将它们放在 `scripts/`，并生成根目录 `Pipfile`。
+
 ## 生成的 CMake 项目构建方式
 
 进入生成目录后：
@@ -107,6 +112,34 @@ cd my-awesome-app
 cmake -S . -B build
 cmake --build build --config Release
 ```
+
+根 CMake 文件会自动搜索 `src/` 下所有包含 `CMakeLists.txt` 的子目录，并安装其中可安装的可执行程序和库目标。新增符合该约定的项目后，无需修改根 CMake 文件。
+
+## 生成项目的 Python 开发脚本
+
+创建项目时可选择不生成脚本（默认）、直接使用 Python，或使用 Pipenv。脚本需要 Python 3 与 CMake。
+
+直接模式在项目根目录执行：
+
+```bash
+python mksln.py
+python build.py --config Release
+python install.py --config Release --prefix install
+python build-install.py --config Release
+python archive.py --config Release
+```
+
+Pipenv 模式使用等价命令：
+
+```bash
+pipenv run mksln
+pipenv run build --config Release
+pipenv run install --config Release --prefix install
+pipenv run build-install --config Release
+pipenv run archive --config Release
+```
+
+`mksln.py` 配置 CMake 并生成构建文件；`build.py` 配置并编译；`install.py` 执行 `cmake --install`；`build-install.py` 合并编译和安装；`archive.py` 将构建后的 `bin/` 打包至 `dist/`。
 
 运行程序：
 

@@ -1,4 +1,4 @@
-add_executable(App main.cpp)
-include_directories(${MY_INC_DIR})
-target_link_libraries(App PRIVATE Static)
-target_link_libraries(App PRIVATE Dynamic)
+project(App)
+define_executable()
+target_include_directories(App PRIVATE ${MY_INC_DIR})
+link_internal_projects(Static Dynamic)

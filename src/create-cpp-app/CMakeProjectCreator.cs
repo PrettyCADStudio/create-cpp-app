@@ -27,6 +27,7 @@ public static class CMakeProjectCreator
         CreateThirdPartyFolder(settings);
         CreatePatchFolder(settings);
         CreateCMakeFolder(settings);
+        CreateDevelopmentScripts(settings);
         CreateStaticProject(settings);
         CreateDynamicProject(settings);
         CreateAppProject(settings);
@@ -91,7 +92,265 @@ public static class CMakeProjectCreator
 
         var sb = new StringBuilder();
         AppendLine(sb, $"# {settings.ProjectName} cmake functions");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Add every child project below MY_SRC_DIR.");
+        AppendLine(sb, "# Usage: call add_projects() once from the root CMakeLists.txt after including this file.");
+        AppendLine(sb, "# Each child directory must contain CMakeLists.txt, define a target named after its directory, and be independent of scan order.");
+        AppendLine(sb, "# CONFIGURE_DEPENDS makes CMake rescan when projects are added or removed; rerun CMake if your generator does not support it.");
+        AppendLine(sb, "function(add_projects)");
+        AppendLine(sb, "    set(installable_projects)");
+        AppendLine(sb, "    file(GLOB_RECURSE cmake_lists RELATIVE \"${MY_SRC_DIR}\" CONFIGURE_DEPENDS \"${MY_SRC_DIR}/*/CMakeLists.txt\")");
+        AppendLine(sb, "    foreach(cmake_list IN LISTS cmake_lists)");
+        AppendLine(sb, "        get_filename_component(project_directory \"${cmake_list}\" DIRECTORY)");
+        AppendLine(sb, "        if(NOT project_directory STREQUAL \".\")");
+        AppendLine(sb, "            add_subdirectory(\"${MY_SRC_DIR}/${project_directory}\")");
+        AppendLine(sb, "            get_filename_component(project_name \"${project_directory}\" NAME)");
+        AppendLine(sb, "            get_filename_component(project_folder \"${project_directory}\" DIRECTORY)");
+        AppendLine(sb, "            if(TARGET \"${project_name}\")");
+        AppendLine(sb, "                set_property(TARGET \"${project_name}\" PROPERTY FOLDER \"${project_folder}\")");
+        AppendLine(sb, "                get_target_property(project_type \"${project_name}\" TYPE)");
+        AppendLine(sb, "                if(project_type STREQUAL \"EXECUTABLE\" OR project_type STREQUAL \"STATIC_LIBRARY\" OR project_type STREQUAL \"SHARED_LIBRARY\" OR project_type STREQUAL \"MODULE_LIBRARY\")");
+        AppendLine(sb, "                    list(APPEND installable_projects \"${project_name}\")");
+        AppendLine(sb, "                endif()");
+        AppendLine(sb, "            endif()");
+        AppendLine(sb, "        endif()");
+        AppendLine(sb, "    endforeach()");
+        AppendLine(sb, "    set_property(GLOBAL PROPERTY PROJECT_INSTALLABLE_TARGETS \"${installable_projects}\")");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Install all executable and library targets discovered by add_projects.");
+        AppendLine(sb, "# Usage: call install_projects() after add_projects() in the root CMakeLists.txt.");
+        AppendLine(sb, "# Executables and shared libraries go to bin/; static and import libraries go to lib/ under CMAKE_INSTALL_PREFIX.");
+        AppendLine(sb, "function(install_projects)");
+        AppendLine(sb, "    get_property(installable_projects GLOBAL PROPERTY PROJECT_INSTALLABLE_TARGETS)");
+        AppendLine(sb, "    if(installable_projects)");
+        AppendLine(sb, "        install(TARGETS ${installable_projects}");
+        AppendLine(sb, "            RUNTIME DESTINATION bin");
+        AppendLine(sb, "            LIBRARY DESTINATION lib");
+        AppendLine(sb, "            ARCHIVE DESTINATION lib)");
+        AppendLine(sb, "    endif()");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Collect C/C++ source and header files recursively.");
+        AppendLine(sb, "# Usage: search_project_files(<project-directory> <output-variable>).");
+        AppendLine(sb, "# The output variable is set in the caller's scope. CMake reconfigures when matching files change.");
+        AppendLine(sb, "function(search_project_files project_directory project_files)");
+        AppendLine(sb, "    file(GLOB_RECURSE files CONFIGURE_DEPENDS");
+        AppendLine(sb, "        \"${project_directory}/*.c\"");
+        AppendLine(sb, "        \"${project_directory}/*.cc\"");
+        AppendLine(sb, "        \"${project_directory}/*.cpp\"");
+        AppendLine(sb, "        \"${project_directory}/*.cxx\"");
+        AppendLine(sb, "        \"${project_directory}/*.h\"");
+        AppendLine(sb, "        \"${project_directory}/*.hh\"");
+        AppendLine(sb, "        \"${project_directory}/*.hpp\"");
+        AppendLine(sb, "        \"${project_directory}/*.hxx\")");
+        AppendLine(sb, "    set(${project_files} \"${files}\" PARENT_SCOPE)");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Put files in IDE source groups that mirror their directories.");
+        AppendLine(sb, "# Usage: group_project_files(<project-directory> <file>...). This only affects IDE presentation.");
+        AppendLine(sb, "function(group_project_files project_directory)");
+        AppendLine(sb, "    foreach(project_file IN LISTS ARGN)");
+        AppendLine(sb, "        get_filename_component(project_file_directory \"${project_file}\" DIRECTORY)");
+        AppendLine(sb, "        file(RELATIVE_PATH project_filter \"${project_directory}\" \"${project_file_directory}\")");
+        AppendLine(sb, "        source_group(\"${project_filter}\" FILES \"${project_file}\")");
+        AppendLine(sb, "    endforeach()");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Configure conventional Public/ and Private/ include directories for a target.");
+        AppendLine(sb, "# Usage: include_project_directories(<target> <project-directory>).");
+        AppendLine(sb, "# Headers in Public/ are exposed to consumers; Private/ is used only while compiling this target.");
+        AppendLine(sb, "function(include_project_directories target project_directory)");
+        AppendLine(sb, "    if(EXISTS \"${project_directory}/Public\")");
+        AppendLine(sb, "        target_include_directories(${target} PUBLIC \"${project_directory}/Public\")");
+        AppendLine(sb, "    endif()");
+        AppendLine(sb, "    if(EXISTS \"${project_directory}/Private\")");
+        AppendLine(sb, "        target_include_directories(${target} PRIVATE \"${project_directory}\" \"${project_directory}/Private\")");
+        AppendLine(sb, "    endif()");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Define an executable from files in the current project directory.");
+        AppendLine(sb, "# Usage in a child CMakeLists.txt: project(MyApp) followed by define_executable().");
+        AppendLine(sb, "# Call link_internal_projects(...) afterwards to link targets defined elsewhere in this solution.");
+        AppendLine(sb, "function(define_executable)");
+        AppendLine(sb, "    search_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" project_files)");
+        AppendLine(sb, "    add_executable(${PROJECT_NAME} ${project_files})");
+        AppendLine(sb, "    group_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" ${project_files})");
+        AppendLine(sb, "    include_project_directories(${PROJECT_NAME} \"${CMAKE_CURRENT_SOURCE_DIR}\")");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Define a static library from files in the current project directory.");
+        AppendLine(sb, "# Usage in a child CMakeLists.txt: project(MyLibrary) followed by define_static_library().");
+        AppendLine(sb, "# Public/ headers become part of the library's public include interface.");
+        AppendLine(sb, "function(define_static_library)");
+        AppendLine(sb, "    search_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" project_files)");
+        AppendLine(sb, "    add_library(${PROJECT_NAME} STATIC ${project_files})");
+        AppendLine(sb, "    group_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" ${project_files})");
+        AppendLine(sb, "    include_project_directories(${PROJECT_NAME} \"${CMAKE_CURRENT_SOURCE_DIR}\")");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Define a shared library from files in the current project directory.");
+        AppendLine(sb, "# Usage in a child CMakeLists.txt: project(MyLibrary) followed by define_shared_library().");
+        AppendLine(sb, "# Exported symbols still need platform-appropriate export macros in public headers.");
+        AppendLine(sb, "function(define_shared_library)");
+        AppendLine(sb, "    search_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" project_files)");
+        AppendLine(sb, "    add_library(${PROJECT_NAME} SHARED ${project_files})");
+        AppendLine(sb, "    group_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" ${project_files})");
+        AppendLine(sb, "    include_project_directories(${PROJECT_NAME} \"${CMAKE_CURRENT_SOURCE_DIR}\")");
+        AppendLine(sb, "endfunction()");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "# Link targets from this CMake solution to the current project.");
+        AppendLine(sb, "# Usage: link_internal_projects(TargetA TargetB ...). Targets are linked with PUBLIC visibility.");
+        AppendLine(sb, "# Use target_link_libraries directly when PRIVATE or INTERFACE visibility is required.");
+        AppendLine(sb, "function(link_internal_projects)");
+        AppendLine(sb, "    target_link_libraries(${PROJECT_NAME} PUBLIC ${ARGN})");
+        AppendLine(sb, "endfunction()");
         WriteFile(Path.Combine(settings.CmakeDir, $"{settings.ProjectName}.cmake"), sb.ToString());
+    }
+
+    private static void CreateDevelopmentScripts(CMakeProjectSettings settings)
+    {
+        if (settings.PythonScripts == PythonScriptMode.None)
+        {
+            return;
+        }
+
+        var scriptDir = settings.PythonScripts == PythonScriptMode.Pipenv
+            ? Path.Combine(settings.ProjectDir, "scripts")
+            : settings.ProjectDir;
+        Directory.CreateDirectory(scriptDir);
+
+        WriteFile(Path.Combine(scriptDir, "mksln.py"), """
+            import argparse
+            import subprocess
+            from pathlib import Path
+
+            SCRIPT_DIR = Path(__file__).resolve().parent
+            PROJECT_DIR = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
+
+            def main():
+                parser = argparse.ArgumentParser(description="Configure the CMake project and generate build files")
+                parser.add_argument("-G", "--generator", help="CMake generator, for example Ninja or Visual Studio 18 2026")
+                args = parser.parse_args()
+
+                command = ["cmake", "-S", str(PROJECT_DIR), "-B", str(PROJECT_DIR / "build")]
+                if args.generator:
+                    command.extend(["-G", args.generator])
+                subprocess.run(command, check=True)
+
+            if __name__ == "__main__":
+                main()
+            """);
+        WriteFile(Path.Combine(scriptDir, "build.py"), """
+            import argparse
+            import subprocess
+            from pathlib import Path
+
+            SCRIPT_DIR = Path(__file__).resolve().parent
+            PROJECT_DIR = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
+            BUILD_DIR = PROJECT_DIR / "build"
+
+            def main():
+                parser = argparse.ArgumentParser(description="Configure and build the CMake project")
+                parser.add_argument("--config", default="Release", help="Build configuration (default: Release)")
+                args = parser.parse_args()
+
+                subprocess.run(["cmake", "-S", str(PROJECT_DIR), "-B", str(BUILD_DIR)], check=True)
+                subprocess.run(["cmake", "--build", str(BUILD_DIR), "--config", args.config], check=True)
+
+            if __name__ == "__main__":
+                main()
+            """);
+        WriteFile(Path.Combine(scriptDir, "install.py"), """
+            import argparse
+            import subprocess
+            from pathlib import Path
+
+            SCRIPT_DIR = Path(__file__).resolve().parent
+            PROJECT_DIR = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
+            BUILD_DIR = PROJECT_DIR / "build"
+
+            def main():
+                parser = argparse.ArgumentParser(description="Install the CMake project")
+                parser.add_argument("--config", default="Release", help="Build configuration (default: Release)")
+                parser.add_argument("--prefix", default=str(PROJECT_DIR / "install"), help="Install destination (default: <project>/install)")
+                args = parser.parse_args()
+
+                subprocess.run(["cmake", "--install", str(BUILD_DIR), "--config", args.config, "--prefix", args.prefix], check=True)
+
+            if __name__ == "__main__":
+                main()
+            """);
+        WriteFile(Path.Combine(scriptDir, "build-install.py"), """
+            import argparse
+            import subprocess
+            import sys
+            from pathlib import Path
+
+            SCRIPT_DIR = Path(__file__).resolve().parent
+
+            def main():
+                parser = argparse.ArgumentParser(description="Build and install the CMake project")
+                parser.add_argument("--config", default="Release", help="Build configuration (default: Release)")
+                parser.add_argument("--prefix", help="Install destination (default: <project>/install)")
+                args = parser.parse_args()
+
+                subprocess.run([sys.executable, str(SCRIPT_DIR / "build.py"), "--config", args.config], check=True)
+                command = [sys.executable, str(SCRIPT_DIR / "install.py"), "--config", args.config]
+                if args.prefix:
+                    command.extend(["--prefix", args.prefix])
+                subprocess.run(command, check=True)
+
+            if __name__ == "__main__":
+                main()
+            """);
+        WriteFile(Path.Combine(scriptDir, "archive.py"), """
+            import argparse
+            import shutil
+            import subprocess
+            import sys
+            from pathlib import Path
+
+            SCRIPT_DIR = Path(__file__).resolve().parent
+            PROJECT_DIR = SCRIPT_DIR.parent if SCRIPT_DIR.name == "scripts" else SCRIPT_DIR
+
+            def main():
+                parser = argparse.ArgumentParser(description="Build and archive the CMake project output")
+                parser.add_argument("--config", default="Release", help="Build configuration (default: Release)")
+                args = parser.parse_args()
+
+                subprocess.run([sys.executable, str(SCRIPT_DIR / "build.py"), "--config", args.config], check=True)
+                output_dir = PROJECT_DIR / "bin"
+                if not output_dir.is_dir():
+                    raise RuntimeError(f"Build output directory not found: {output_dir}")
+                dist_dir = PROJECT_DIR / "dist"
+                dist_dir.mkdir(exist_ok=True)
+                archive = shutil.make_archive(str(dist_dir / f"{PROJECT_DIR.name}-{args.config}"), "zip", output_dir)
+                print(archive)
+
+            if __name__ == "__main__":
+                main()
+            """);
+
+        if (settings.PythonScripts == PythonScriptMode.Pipenv)
+        {
+            WriteFile(Path.Combine(settings.ProjectDir, "Pipfile"), """
+                [[source]]
+                url = "https://pypi.org/simple"
+                verify_ssl = true
+                name = "pypi"
+
+                [requires]
+                python_version = "3"
+
+                [scripts]
+                mksln = "python scripts/mksln.py"
+                build = "python scripts/build.py"
+                install = "python scripts/install.py"
+                build-install = "python scripts/build-install.py"
+                archive = "python scripts/archive.py"
+                """);
+        }
     }
 
     private static void CreateStaticProject(CMakeProjectSettings settings)
@@ -137,8 +396,8 @@ public static class CMakeProjectCreator
     private static void CreateStaticCMakeFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        AppendLine(sb, "add_library(Static STATIC Private/StaticLib.cpp)");
-        AppendLine(sb, "target_include_directories(Static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)");
+        AppendLine(sb, "project(Static)");
+        AppendLine(sb, "define_static_library()");
 
         var path = Path.Combine(settings.StaticDir, "CMakeLists.txt");
         WriteFile(path, sb.ToString());
@@ -212,8 +471,8 @@ public static class CMakeProjectCreator
     private static void CreateDynamicCMakeFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        AppendLine(sb, "add_library(Dynamic SHARED Private/DynamicLib.cpp)");
-        AppendLine(sb, "target_include_directories(Dynamic PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/Public)");
+        AppendLine(sb, "project(Dynamic)");
+        AppendLine(sb, "define_shared_library()");
 
         var path = Path.Combine(settings.DynamicDir, "CMakeLists.txt");
         WriteFile(path, sb.ToString());
@@ -229,13 +488,13 @@ public static class CMakeProjectCreator
     private static void CreateAppCMakeFile(CMakeProjectSettings settings)
     {
         var sb = new StringBuilder();
-        AppendLine(sb, "add_executable(App main.cpp)");
+        AppendLine(sb, "project(App)");
+        AppendLine(sb, "define_executable()");
         if (settings.UseIncFolder)
         {
-            AppendLine(sb, "include_directories(${MY_INC_DIR})");
+            AppendLine(sb, "target_include_directories(App PRIVATE ${MY_INC_DIR})");
         }
-        AppendLine(sb, "target_link_libraries(App PRIVATE Static)");
-        AppendLine(sb, "target_link_libraries(App PRIVATE Dynamic)");
+        AppendLine(sb, "link_internal_projects(Static Dynamic)");
 
         var path = Path.Combine(settings.AppDir, "CMakeLists.txt");
         WriteFile(path, sb.ToString());
@@ -323,9 +582,8 @@ public static class CMakeProjectCreator
         AppendLine(sb, $"include(${{MY_CMAKE_DIR}}/{settings.ProjectName}.cmake)");
         AppendLine(sb, string.Empty);
 
-        AppendLine(sb, "add_subdirectory(src/App)");
-        AppendLine(sb, "add_subdirectory(src/Static)");
-        AppendLine(sb, "add_subdirectory(src/Dynamic)");
+        AppendLine(sb, "add_projects()");
+        AppendLine(sb, "install_projects()");
 
         WriteFile(Path.Combine(settings.ProjectDir, "CMakeLists.txt"), sb.ToString());
     }

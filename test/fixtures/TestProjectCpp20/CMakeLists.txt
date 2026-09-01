@@ -30,6 +30,5 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${MY_BINARY_DIR}/RelWithDebIn
 
 include(${MY_CMAKE_DIR}/TestProjectCpp20.cmake)
 
-add_subdirectory(src/App)
-add_subdirectory(src/Static)
-add_subdirectory(src/Dynamic)
+add_projects()
+install_projects()
