@@ -32,6 +32,103 @@ public static class CMakeProjectCreator
         CreateDynamicProject(settings);
         CreateAppProject(settings);
         CreateSolutionCMakeFile(settings);
+        CreateGitRepository(settings);
+    }
+
+    private static void CreateGitRepository(CMakeProjectSettings settings)
+    {
+        if (!settings.InitializeGit || !IsGitAvailable())
+        {
+            return;
+        }
+
+        CreateGitIgnore(settings);
+
+        if (!RunGit(settings.ProjectDir, "init") ||
+            !RunGit(settings.ProjectDir, "add", "--all") ||
+            !RunGit(
+                settings.ProjectDir,
+                "-c", "user.name=create-cpp-app",
+                "-c", "user.email=create-cpp-app@localhost",
+                "commit", "-m", "Initial project"))
+        {
+            Console.Error.WriteLine("Warning: Git repository initialization was not completed.");
+            return;
+        }
+
+        Console.WriteLine("  Git repository initialized with an initial commit.");
+    }
+
+    private static void CreateGitIgnore(CMakeProjectSettings settings)
+    {
+        WriteFile(Path.Combine(settings.ProjectDir, ".gitignore"), """
+            # CMake build output
+            /build/
+            /bin/
+            /install/
+            /dist/
+            CMakeCache.txt
+            CMakeFiles/
+            cmake_install.cmake
+            Makefile
+            compile_commands.json
+
+            # IDE files
+            /.vs/
+            /.idea/
+            *.sln
+            *.vcxproj
+            *.vcxproj.filters
+            *.vcxproj.user
+
+            # Python development files
+            __pycache__/
+            *.py[cod]
+            .venv/
+
+            # Operating system files
+            .DS_Store
+            Thumbs.db
+            """);
+    }
+
+    private static bool IsGitAvailable()
+    {
+        return RunGit(Directory.GetCurrentDirectory(), "--version");
+    }
+
+    private static bool RunGit(string workingDirectory, params string[] arguments)
+    {
+        try
+        {
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "git",
+                WorkingDirectory = workingDirectory,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            };
+            foreach (var argument in arguments)
+            {
+                startInfo.ArgumentList.Add(argument);
+            }
+
+            using var process = System.Diagnostics.Process.Start(startInfo);
+            if (process is null)
+            {
+                return false;
+            }
+
+            process.StandardOutput.ReadToEnd();
+            process.StandardError.ReadToEnd();
+            process.WaitForExit();
+            return process.ExitCode == 0;
+        }
+        catch (Exception exception) when (exception is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            return false;
+        }
     }
 
     private static void CreateIncFolder(CMakeProjectSettings settings)

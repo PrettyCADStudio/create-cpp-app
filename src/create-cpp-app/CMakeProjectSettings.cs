@@ -17,6 +17,7 @@ public sealed record CMakeProjectSettings
     public required bool UsePatchFolder { get; init; }
     public required bool Force { get; init; }
     public PythonScriptMode PythonScripts { get; init; } = PythonScriptMode.None;
+    public bool InitializeGit { get; init; } = true;
 
     // This is primarily useful to callers embedding the generator (including tests).
     // The CLI intentionally leaves it at the process working directory.

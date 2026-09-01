@@ -95,6 +95,8 @@ Create 'patch' folder for patches?: No
 
 执行完成后，当前目录下会创建 `my-app` 项目目录。
 
+如果系统中可运行 `git`，工具还会初始化 Git 仓库，生成 `.gitignore`，并创建一个包含初始项目文件的提交。`.gitignore` 会忽略构建、安装、归档、IDE 和 Python 缓存文件。
+
 ## 覆盖已有项目
 
 若当前目录中已有同名目录，工具会询问是否删除该目录后重新创建：
@@ -124,6 +126,7 @@ create-cpp-app -f
 ```text
 my-app/
 ├── CMakeLists.txt
+├── .gitignore
 ├── cmake/
 │   └── my-app.cmake
 ├── inc/

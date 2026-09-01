@@ -15,6 +15,7 @@ create-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工�
 - 工程级 `cmake/` 目录
 - 自动发现 `src/` 下的 CMake 子项目，并提供统一的可执行程序、静态库和动态库定义函数
 - 可选生成 Python 开发脚本，支持直接运行或通过 Pipenv 命令运行
+- 检测到 Git 时自动初始化仓库、生成 `.gitignore` 并创建初始提交
 - 统一输出目录为 `bin/`
 - 提供 build / archive / install / clean / test 脚本
 
@@ -78,6 +79,7 @@ Add 'inc' folder for shared headers? (y/N)
 ```text
 my-awesome-app/
 ├── CMakeLists.txt
+├── .gitignore
 ├── cmake/
 │   └── my-awesome-app.cmake
 ├── inc/                  # 可选
@@ -102,6 +104,8 @@ my-awesome-app/
 ```
 
 选择 Python 脚本开发辅助时，还会生成 `mksln.py`、`build.py`、`install.py`、`build-install.py` 和 `archive.py`。直接运行模式将它们放在项目根目录；Pipenv 模式将它们放在 `scripts/`，并生成根目录 `Pipfile`。
+
+如果系统可以运行 `git`，项目创建完成后会自动执行 Git 初始化并创建初始提交。生成的 `.gitignore` 会排除构建、安装、归档、IDE 和 Python 缓存文件。
 
 ## 生成的 CMake 项目构建方式
 

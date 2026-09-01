@@ -70,12 +70,14 @@ public class CMakeProjectCreatorTests : IDisposable
             UseThirdPartyFolder = config.UseThirdPartyFolder,
             UsePatchFolder = config.UsePatchFolder,
             Force = false,
+            InitializeGit = false,
             OutputDirectory = _runDir,
         };
 
         CMakeProjectCreator.Create(settings);
 
         var generatedDir = Path.Combine(_runDir, config.ProjectName);
+        Assert.False(Directory.Exists(Path.Combine(generatedDir, ".git")));
         AssertDirectoriesEqual(fixtureDir, generatedDir);
         AssertCMakeProjectBuilds(generatedDir);
 
@@ -98,6 +100,7 @@ public class CMakeProjectCreatorTests : IDisposable
             UseThirdPartyFolder = false,
             UsePatchFolder = false,
             Force = false,
+            InitializeGit = false,
             OutputDirectory = _runDir,
         };
 
@@ -120,6 +123,7 @@ public class CMakeProjectCreatorTests : IDisposable
             UsePatchFolder = false,
             Force = false,
             PythonScripts = scriptMode,
+            InitializeGit = false,
             OutputDirectory = _runDir,
         };
 
@@ -198,7 +202,7 @@ public class CMakeProjectCreatorTests : IDisposable
     {
         return Directory.GetFiles(dir, "*", SearchOption.AllDirectories)
             .Select(f => Path.GetRelativePath(dir, f).Replace('\\', '/'))
-            .Where(f => f != ConfigFileName)
+            .Where(f => f != ConfigFileName && !f.StartsWith(".git/", StringComparison.OrdinalIgnoreCase))
             .OrderBy(f => f)
             .ToList();
     }
