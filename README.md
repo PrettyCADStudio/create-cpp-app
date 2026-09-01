@@ -105,7 +105,7 @@ my-awesome-app/
 
 选择 Python 脚本开发辅助时，还会生成 `mksln.py`、`build.py`、`install.py`、`build-install.py` 和 `archive.py`。直接运行模式将它们放在项目根目录；Pipenv 模式将它们放在 `scripts/`，并生成根目录 `Pipfile`。
 
-如果系统可以运行 `git`，项目创建完成后会自动执行 Git 初始化并创建初始提交。生成的 `.gitignore` 会排除构建、安装、归档、IDE 和 Python 缓存文件。
+如果系统可以运行 `git`，项目创建完成后会自动执行 Git 初始化并创建初始提交。生成的 `.gitignore` 会排除构建、安装、归档、IDE 和 Python 缓存文件。选择 Pipenv 脚本模式且系统可运行 `pipenv` 时，会先执行 `pipenv install` 生成 `Pipfile.lock`，再将其包含在初始提交中。
 
 ## 生成的 CMake 项目构建方式
 

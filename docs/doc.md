@@ -95,7 +95,7 @@ Create 'patch' folder for patches?: No
 
 执行完成后，当前目录下会创建 `my-app` 项目目录。
 
-如果系统中可运行 `git`，工具还会初始化 Git 仓库，生成 `.gitignore`，并创建一个包含初始项目文件的提交。`.gitignore` 会忽略构建、安装、归档、IDE 和 Python 缓存文件。
+如果系统中可运行 `git`，工具还会初始化 Git 仓库，生成 `.gitignore`，并创建一个包含初始项目文件的提交。`.gitignore` 会忽略构建、安装、归档、IDE 和 Python 缓存文件。选择 Pipenv 模式且系统中可运行 `pipenv` 时，工具会在提交前执行 `pipenv install` 生成 `Pipfile.lock`；未安装 pipenv 或执行失败时会跳过该文件。
 
 ## 覆盖已有项目
 

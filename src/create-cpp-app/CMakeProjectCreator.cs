@@ -44,8 +44,15 @@ public static class CMakeProjectCreator
 
         CreateGitIgnore(settings);
 
-        if (!RunGit(settings.ProjectDir, "init") ||
-            !RunGit(settings.ProjectDir, "add", "--all") ||
+        if (!RunGit(settings.ProjectDir, "init"))
+        {
+            Console.Error.WriteLine("Warning: Git repository initialization was not completed.");
+            return;
+        }
+
+        CreatePipenvLockFile(settings);
+
+        if (!RunGit(settings.ProjectDir, "add", "--all") ||
             !RunGit(
                 settings.ProjectDir,
                 "-c", "user.name=create-cpp-app",
@@ -57,6 +64,19 @@ public static class CMakeProjectCreator
         }
 
         Console.WriteLine("  Git repository initialized with an initial commit.");
+    }
+
+    private static void CreatePipenvLockFile(CMakeProjectSettings settings)
+    {
+        if (settings.PythonScripts != PythonScriptMode.Pipenv || !IsPipenvAvailable())
+        {
+            return;
+        }
+
+        if (!RunProcess("pipenv", settings.ProjectDir, "install"))
+        {
+            Console.Error.WriteLine("Warning: Pipenv could not create Pipfile.lock; continuing without it.");
+        }
     }
 
     private static void CreateGitIgnore(CMakeProjectSettings settings)
@@ -94,16 +114,26 @@ public static class CMakeProjectCreator
 
     private static bool IsGitAvailable()
     {
-        return RunGit(Directory.GetCurrentDirectory(), "--version");
+        return RunProcess("git", Directory.GetCurrentDirectory(), "--version");
+    }
+
+    private static bool IsPipenvAvailable()
+    {
+        return RunProcess("pipenv", Directory.GetCurrentDirectory(), "--version");
     }
 
     private static bool RunGit(string workingDirectory, params string[] arguments)
+    {
+        return RunProcess("git", workingDirectory, arguments);
+    }
+
+    private static bool RunProcess(string fileName, string workingDirectory, params string[] arguments)
     {
         try
         {
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
-                FileName = "git",
+                FileName = fileName,
                 WorkingDirectory = workingDirectory,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
