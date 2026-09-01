@@ -113,10 +113,10 @@ public class CMakeProjectCreatorTests : IDisposable
 
         foreach (var relativePath in expectedFiles)
         {
-            var expectedContent = File.ReadAllText(Path.Combine(expectedDir, relativePath));
-            var actualContent = File.ReadAllText(Path.Combine(actualDir, relativePath));
+            var expectedLines = File.ReadAllLines(Path.Combine(expectedDir, relativePath));
+            var actualLines = File.ReadAllLines(Path.Combine(actualDir, relativePath));
 
-            Assert.True(expectedContent == actualContent,
+            Assert.True(expectedLines.SequenceEqual(actualLines),
                 $"Content mismatch: {relativePath}");
         }
     }
