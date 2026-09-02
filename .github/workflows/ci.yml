@@ -50,5 +50,6 @@ jobs:
           path: |
             dist/*.zip
             dist/*.whl
+            dist/*.nupkg
             dist/*.tgz
           if-no-files-found: error

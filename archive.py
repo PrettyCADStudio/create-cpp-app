@@ -152,6 +152,23 @@ def archive_python(version):
     print(wheel_path)
 
 
+def archive_nuget(version):
+    """Build a NuGet package for use by .NET projects."""
+    result = subprocess.run(
+        ["dotnet", "pack", PROJECT_FILE, "-c", "Release", "--output", DIST_DIR]
+    )
+    if result.returncode != 0:
+        raise RuntimeError("Failed to build the NuGet package")
+
+    packages = glob.glob(os.path.join(DIST_DIR, f"{APPLICATION_NAME}.{version}.nupkg"))
+    if not packages:
+        raise RuntimeError("NuGet pack completed but no package was found")
+
+    package_path = max(packages, key=os.path.getmtime)
+    print(f"Archived to {package_path}", file=sys.stderr)
+    print(package_path)
+
+
 def get_node_platform_name():
     node_platforms = {
         "Darwin": "darwin",
@@ -225,14 +242,16 @@ def main():
     parser = argparse.ArgumentParser(description="Archive build output")
     parser.add_argument("--zip", action="store_true", help="Package the self-contained application as a ZIP file")
     parser.add_argument("--python", dest="python_package", action="store_true", help="Build a pip-installable Python wheel")
+    parser.add_argument("--nuget", action="store_true", help="Build a NuGet package for .NET projects")
     parser.add_argument("--nodejs", action="store_true", help="Build an npm-installable Node.js package")
-    parser.add_argument("--all", action="store_true", help="Build the ZIP archive, Python wheel, and Node.js package")
+    parser.add_argument("--all", action="store_true", help="Build the ZIP archive, Python wheel, NuGet package, and Node.js package")
     args = parser.parse_args()
 
     create_zip = args.zip or args.all
     create_python = args.python_package or args.all
+    create_nuget = args.nuget or args.all
     create_nodejs = args.nodejs or args.all
-    create_folder = not create_zip and not create_python and not create_nodejs
+    create_folder = not create_zip and not create_python and not create_nuget and not create_nodejs
 
     if (create_zip or create_folder) and not os.path.isfile(DOCUMENTATION_FILE):
         print(
@@ -260,6 +279,9 @@ def main():
 
     if create_python:
         archive_python(version)
+
+    if create_nuget:
+        archive_nuget(version)
 
     if create_nodejs:
         archive_nodejs(version)

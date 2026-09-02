@@ -69,6 +69,22 @@ npm install --global ./crt-cpp-app-win32-x64-<version>.tgz
 
 包名会包含目标平台和架构，例如 Windows x64 为 `crt-cpp-app-win32-x64`。安装后可直接使用 `crt-cpp-app`；npm 包同样内嵌自包含的 C# 程序，因此不需要安装 .NET runtime 或 SDK。
 
+## 通过 NuGet 使用
+
+可通过打包脚本生成 `.nupkg` 文件：
+
+```bash
+python archive.py --nuget
+```
+
+将生成的 `dist/crt-cpp-app.<version>.nupkg` 所在目录作为 NuGet 源后，可安装为 .NET 全局工具：
+
+```bash
+dotnet tool install --global crt-cpp-app --version <version> --add-source ./dist
+```
+
+安装后执行 `crt-cpp-app`。如果只需要当前目录使用，可以将 `--global` 替换为 `--tool-path <目录>`。
+
 ## 创建项目
 
 在希望存放新项目的目录中运行：
