@@ -197,7 +197,7 @@ python src/install.py --source dist/<archive-folder>
 python clean.py
 ```
 
-清理 build、obj、bin 及其他中间产物；如果需要额外清理 `dist`：
+清理工具与测试项目的 `obj/` 目录、共享的 `bin/` 构建产物，以及系统临时目录中以 `create-cpp-app-` 开头的残留目录（包括测试和发布过程的临时文件）。如果需要额外清理 `dist`：
 
 ```bash
 python clean.py --dist
