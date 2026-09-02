@@ -1,8 +1,4 @@
 {
   "projectName": "TestProjectAllOptions",
-  "cppStandard": "20",
-  "useIncFolder": true,
-  "useResFolder": true,
-  "useThirdPartyFolder": true,
-  "usePatchFolder": true
+  "cppStandard": "20"
 }

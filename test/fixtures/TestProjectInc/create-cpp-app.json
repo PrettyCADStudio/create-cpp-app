@@ -1,5 +1,4 @@
 {
   "projectName": "TestProjectInc",
-  "cppStandard": "17",
-  "useIncFolder": true
+  "cppStandard": "17"
 }

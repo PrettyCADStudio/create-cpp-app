@@ -6,7 +6,7 @@ create-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工�
 
 - 交互式创建新项目
 - 选择 C++ 标准：17 / 20
-- 可选生成 `inc/` 共享头文件目录
+- 默认生成 `inc/`、`res/`、`3rd/` 和 `patch/` 常用目录
 - 自动生成以下结构：
   - `src/App` 可执行程序
   - `src/Static` 静态库
@@ -71,7 +71,6 @@ create-cpp-app --version
 ```text
 Project name: my-awesome-app
 C++ standard: 17
-Add 'inc' folder for shared headers? (y/N)
 ```
 
 生成目录如下：
@@ -82,7 +81,10 @@ my-awesome-app/
 ├── .gitignore
 ├── cmake/
 │   └── my-awesome-app.cmake
-├── inc/                  # 可选
+├── inc/
+├── res/
+├── 3rd/
+├── patch/
 ├── src/
 │   ├── App/
 │   │   ├── CMakeLists.txt

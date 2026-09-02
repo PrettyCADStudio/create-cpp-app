@@ -56,19 +56,11 @@ public class CMakeProjectCreatorTests : IDisposable
         Console.WriteLine($"[Test] Fixture: {fixtureName}");
         Console.WriteLine($"  ProjectName:  {config.ProjectName}");
         Console.WriteLine($"  CppStandard:  {config.CppStandard}");
-        Console.WriteLine($"  UseIncFolder: {config.UseIncFolder}");
-        Console.WriteLine($"  UseResFolder: {config.UseResFolder}");
-        Console.WriteLine($"  UseThirdPartyFolder: {config.UseThirdPartyFolder}");
-        Console.WriteLine($"  UsePatchFolder: {config.UsePatchFolder}");
 
         var settings = new CMakeProjectSettings
         {
             ProjectName = config.ProjectName,
             CppStandard = config.CppStandard,
-            UseIncFolder = config.UseIncFolder,
-            UseResFolder = config.UseResFolder,
-            UseThirdPartyFolder = config.UseThirdPartyFolder,
-            UsePatchFolder = config.UsePatchFolder,
             Force = false,
             InitializeGit = false,
             OutputDirectory = _runDir,
@@ -95,10 +87,6 @@ public class CMakeProjectCreatorTests : IDisposable
         {
             ProjectName = projectName,
             CppStandard = "17",
-            UseIncFolder = false,
-            UseResFolder = false,
-            UseThirdPartyFolder = false,
-            UsePatchFolder = false,
             Force = false,
             InitializeGit = false,
             OutputDirectory = _runDir,
@@ -117,10 +105,6 @@ public class CMakeProjectCreatorTests : IDisposable
         {
             ProjectName = projectName,
             CppStandard = "17",
-            UseIncFolder = false,
-            UseResFolder = false,
-            UseThirdPartyFolder = false,
-            UsePatchFolder = false,
             Force = false,
             PythonScripts = scriptMode,
             InitializeGit = false,
@@ -213,9 +197,5 @@ public class CMakeProjectCreatorTests : IDisposable
     {
         public string ProjectName { get; set; } = "";
         public string CppStandard { get; set; } = "17";
-        public bool UseIncFolder { get; set; }
-        public bool UseResFolder { get; set; }
-        public bool UseThirdPartyFolder { get; set; }
-        public bool UsePatchFolder { get; set; }
     }
 }

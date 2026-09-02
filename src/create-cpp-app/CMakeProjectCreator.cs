@@ -163,52 +163,34 @@ public static class CMakeProjectCreator
 
     private static void CreateIncFolder(CMakeProjectSettings settings)
     {
-        if (settings.UseIncFolder)
-        {
-            Directory.CreateDirectory(settings.IncDir);
+        Directory.CreateDirectory(settings.IncDir);
 
-            var sb = new StringBuilder();
-            AppendLine(sb, "#pragma once");
-            AppendLine(sb, string.Empty);
-            AppendLine(sb, "#include <iostream>");
-            AppendLine(sb, string.Empty);
-            AppendLine(sb, "inline void HelloWorld()");
-            AppendLine(sb, "{");
-            AppendLine(sb, "    std::cout << \"Hello World\" << std::endl;");
-            AppendLine(sb, "}");
-            WriteFile(Path.Combine(settings.IncDir, $"{settings.ProjectName}.h"), sb.ToString());
-        }
+        var sb = new StringBuilder();
+        AppendLine(sb, "#pragma once");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "#include <iostream>");
+        AppendLine(sb, string.Empty);
+        AppendLine(sb, "inline void HelloWorld()");
+        AppendLine(sb, "{");
+        AppendLine(sb, "    std::cout << \"Hello World\" << std::endl;");
+        AppendLine(sb, "}");
+        WriteFile(Path.Combine(settings.IncDir, $"{settings.ProjectName}.h"), sb.ToString());
     }
 
     private static void CreateResFolder(CMakeProjectSettings settings)
     {
-        if (!settings.UseResFolder)
-        {
-            return;
-        }
-
         Directory.CreateDirectory(settings.ResDir);
         WriteFile(Path.Combine(settings.ResDir, ".keep"), string.Empty);
     }
 
     private static void CreateThirdPartyFolder(CMakeProjectSettings settings)
     {
-        if (!settings.UseThirdPartyFolder)
-        {
-            return;
-        }
-
         Directory.CreateDirectory(settings.ThirdPartyDir);
         WriteFile(Path.Combine(settings.ThirdPartyDir, ".keep"), string.Empty);
     }
 
     private static void CreatePatchFolder(CMakeProjectSettings settings)
     {
-        if (!settings.UsePatchFolder)
-        {
-            return;
-        }
-
         Directory.CreateDirectory(settings.PatchDir);
         WriteFile(Path.Combine(settings.PatchDir, ".keep"), string.Empty);
     }
@@ -617,10 +599,7 @@ public static class CMakeProjectCreator
         var sb = new StringBuilder();
         AppendLine(sb, "project(App)");
         AppendLine(sb, "define_executable()");
-        if (settings.UseIncFolder)
-        {
-            AppendLine(sb, "target_include_directories(App PRIVATE ${MY_INC_DIR})");
-        }
+        AppendLine(sb, "target_include_directories(App PRIVATE ${MY_INC_DIR})");
         AppendLine(sb, "link_internal_projects(Static Dynamic)");
 
         var path = Path.Combine(settings.AppDir, "CMakeLists.txt");
@@ -631,19 +610,13 @@ public static class CMakeProjectCreator
     {
         var sb = new StringBuilder();
         AppendLine(sb, "#include <iostream>");
-        if (settings.UseIncFolder)
-        {
-            AppendLine(sb, $"#include \"{settings.ProjectName}.h\"");
-        }
+        AppendLine(sb, $"#include \"{settings.ProjectName}.h\"");
         AppendLine(sb, "#include \"StaticLib.h\"");
         AppendLine(sb, "#include \"DynamicLib.h\"");
         AppendLine(sb, string.Empty);
         AppendLine(sb, "int main()");
         AppendLine(sb, "{");
-        if (settings.UseIncFolder)
-        {
-            AppendLine(sb, "    HelloWorld();");
-        }
+        AppendLine(sb, "    HelloWorld();");
         AppendLine(sb, "    HelloStatic();");
         AppendLine(sb, "    HelloDynamic();");
         AppendLine(sb, "    return 0;");
@@ -667,25 +640,10 @@ public static class CMakeProjectCreator
         AppendLine(sb, @"set(MY_BUILD_DIR ""${MY_REPO_DIR}/build"")");
         AppendLine(sb, @"set(MY_CMAKE_DIR ""${MY_REPO_DIR}/cmake"")");
 
-        if (settings.UseIncFolder)
-        {
-            AppendLine(sb, @"set(MY_INC_DIR ""${MY_REPO_DIR}/inc"")");
-        }
-
-        if (settings.UseResFolder)
-        {
-            AppendLine(sb, @"set(MY_RES_DIR ""${MY_REPO_DIR}/res"")");
-        }
-
-        if (settings.UseThirdPartyFolder)
-        {
-            AppendLine(sb, @"set(MY_3RD_DIR ""${MY_REPO_DIR}/3rd"")");
-        }
-
-        if (settings.UsePatchFolder)
-        {
-            AppendLine(sb, @"set(MY_PATCH_DIR ""${MY_REPO_DIR}/patch"")");
-        }
+        AppendLine(sb, @"set(MY_INC_DIR ""${MY_REPO_DIR}/inc"")");
+        AppendLine(sb, @"set(MY_RES_DIR ""${MY_REPO_DIR}/res"")");
+        AppendLine(sb, @"set(MY_3RD_DIR ""${MY_REPO_DIR}/3rd"")");
+        AppendLine(sb, @"set(MY_PATCH_DIR ""${MY_REPO_DIR}/patch"")");
 
         AppendLine(sb, @"set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");
         AppendLine(sb, @"set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ""${MY_BINARY_DIR}"")");

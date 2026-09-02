@@ -11,10 +11,6 @@ public sealed record CMakeProjectSettings
 {
     public required string ProjectName { get; init; }
     public required string CppStandard { get; init; }
-    public required bool UseIncFolder { get; init; }
-    public required bool UseResFolder { get; init; }
-    public required bool UseThirdPartyFolder { get; init; }
-    public required bool UsePatchFolder { get; init; }
     public required bool Force { get; init; }
     public PythonScriptMode PythonScripts { get; init; } = PythonScriptMode.None;
     public bool InitializeGit { get; init; } = true;

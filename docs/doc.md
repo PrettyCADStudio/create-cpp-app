@@ -2,7 +2,7 @@
 
 ## 简介
 
-`create-cpp-app` 是一个交互式命令行工具，用于快速创建可由 CMake 构建的 C++ 项目。它会生成一个包含可执行程序、静态库和动态库的基础工程，并可按需创建常用辅助目录。
+`create-cpp-app` 是一个交互式命令行工具，用于快速创建可由 CMake 构建的 C++ 项目。它会生成一个包含可执行程序、静态库、动态库及常用辅助目录的基础工程。
 
 ## 命令格式
 
@@ -76,21 +76,13 @@ create-cpp-app
 
 1. **项目名称**：会作为新建项目目录和 CMake 项目名称；必须以英文字母或下划线开头，后续只能使用英文字母、数字、下划线或连字符。
 2. **C++ 标准**：可选择 C++17 或 C++20，默认是 C++17。
-3. **共享头文件目录**：是否创建 `inc/`。
-4. **资源目录**：是否创建 `res/`。
-5. **第三方库目录**：是否创建 `3rd/`。
-6. **补丁目录**：是否创建 `patch/`。
-7. **Python 开发辅助脚本**：选择不使用（默认）、直接使用 Python 脚本，或使用 Pipenv 运行脚本。
+3. **Python 开发辅助脚本**：选择不使用（默认）、直接使用 Python 脚本，或使用 Pipenv 运行脚本。
 
 示例：
 
 ```text
 Project name: my-app
 C++ standard: 20
-Create 'inc' folder for shared headers?: Yes
-Create 'res' folder for resource files?: No
-Create '3rd' folder for third-party library files in the project?: Yes
-Create 'patch' folder for patches?: No
 ```
 
 执行完成后，当前目录下会创建 `my-app` 项目目录。
@@ -121,7 +113,7 @@ create-cpp-app -f
 
 ## 生成的目录结构
 
-启用所有可选目录时，生成的项目结构如下：
+项目默认生成以下结构：
 
 ```text
 my-app/
@@ -153,7 +145,7 @@ my-app/
             └── DynamicLib.h
 ```
 
-未选择的 `inc/`、`res/`、`3rd/` 和 `patch/` 目录不会生成。
+`inc/`、`res/`、`3rd/` 和 `patch/` 会始终创建；项目创建完成后，可由用户自行添加内容或删除不需要的目录。
 
 选择直接使用 Python 脚本时，项目根目录还会生成 `mksln.py`、`build.py`、`install.py`、`build-install.py` 和 `archive.py`。选择 Pipenv 时，它们位于 `scripts/`，根目录会额外生成 `Pipfile`。
 
@@ -161,7 +153,7 @@ my-app/
 
 ### App
 
-`src/App` 生成名为 `App` 的可执行目标。其 `main.cpp` 会调用静态库和动态库的示例函数；启用 `inc/` 时，也会包含并调用共享头文件中的示例函数。
+`src/App` 生成名为 `App` 的可执行目标。其 `main.cpp` 会调用静态库、动态库和 `inc/` 中共享头文件的示例函数。
 
 ### Static
 
