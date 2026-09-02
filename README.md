@@ -61,7 +61,7 @@ create-cpp-app --version
 输出：
 
 ```text
-0.0.1
+0.1.1
 ```
 
 ## 交互式创建示例

@@ -41,7 +41,7 @@ python install.py
 例如，Windows x64 用户应下载名称类似以下的发布资产：
 
 ```text
-create-cpp-app-v0.0.1-windows-x64.zip
+create-cpp-app-v0.1.1-windows-x64.zip
 ```
 
 ### 安装时的变更
