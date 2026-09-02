@@ -286,6 +286,7 @@ public static class CMakeProjectCreator
         AppendLine(sb, "    add_executable(${PROJECT_NAME} ${project_files})");
         AppendLine(sb, "    group_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" ${project_files})");
         AppendLine(sb, "    include_project_directories(${PROJECT_NAME} \"${CMAKE_CURRENT_SOURCE_DIR}\")");
+        AppendLine(sb, "    target_include_directories(${PROJECT_NAME} PRIVATE ${MY_INC_DIR})");
         AppendLine(sb, "endfunction()");
         AppendLine(sb, string.Empty);
         AppendLine(sb, "# Define a static library from files in the current project directory.");
@@ -296,6 +297,7 @@ public static class CMakeProjectCreator
         AppendLine(sb, "    add_library(${PROJECT_NAME} STATIC ${project_files})");
         AppendLine(sb, "    group_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" ${project_files})");
         AppendLine(sb, "    include_project_directories(${PROJECT_NAME} \"${CMAKE_CURRENT_SOURCE_DIR}\")");
+        AppendLine(sb, "    target_include_directories(${PROJECT_NAME} PRIVATE ${MY_INC_DIR})");
         AppendLine(sb, "endfunction()");
         AppendLine(sb, string.Empty);
         AppendLine(sb, "# Define a shared library from files in the current project directory.");
@@ -306,6 +308,7 @@ public static class CMakeProjectCreator
         AppendLine(sb, "    add_library(${PROJECT_NAME} SHARED ${project_files})");
         AppendLine(sb, "    group_project_files(\"${CMAKE_CURRENT_SOURCE_DIR}\" ${project_files})");
         AppendLine(sb, "    include_project_directories(${PROJECT_NAME} \"${CMAKE_CURRENT_SOURCE_DIR}\")");
+        AppendLine(sb, "    target_include_directories(${PROJECT_NAME} PRIVATE ${MY_INC_DIR})");
         AppendLine(sb, "endfunction()");
         AppendLine(sb, string.Empty);
         AppendLine(sb, "# Link targets from this CMake solution to the current project.");
@@ -599,7 +602,6 @@ public static class CMakeProjectCreator
         var sb = new StringBuilder();
         AppendLine(sb, "project(App)");
         AppendLine(sb, "define_executable()");
-        AppendLine(sb, "target_include_directories(App PRIVATE ${MY_INC_DIR})");
         AppendLine(sb, "link_internal_projects(Static Dynamic)");
 
         var path = Path.Combine(settings.AppDir, "CMakeLists.txt");

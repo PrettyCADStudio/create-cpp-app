@@ -84,6 +84,7 @@ function(define_executable)
     add_executable(${PROJECT_NAME} ${project_files})
     group_project_files("${CMAKE_CURRENT_SOURCE_DIR}" ${project_files})
     include_project_directories(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${MY_INC_DIR})
 endfunction()
 
 # Define a static library from files in the current project directory.
@@ -94,6 +95,7 @@ function(define_static_library)
     add_library(${PROJECT_NAME} STATIC ${project_files})
     group_project_files("${CMAKE_CURRENT_SOURCE_DIR}" ${project_files})
     include_project_directories(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${MY_INC_DIR})
 endfunction()
 
 # Define a shared library from files in the current project directory.
@@ -104,6 +106,7 @@ function(define_shared_library)
     add_library(${PROJECT_NAME} SHARED ${project_files})
     group_project_files("${CMAKE_CURRENT_SOURCE_DIR}" ${project_files})
     include_project_directories(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${MY_INC_DIR})
 endfunction()
 
 # Link targets from this CMake solution to the current project.
