@@ -15,6 +15,7 @@ create-cpp-app [选项]
 | 选项 | 说明 |
 | --- | --- |
 | `-f`、`--force` | 如果同名项目目录已存在，删除该目录并重新创建项目，不再请求确认。 |
+| `--where` | 输出当前正在运行的 `create-cpp-app` 可执行程序的完整路径。 |
 | `--version` | 显示当前工具版本。 |
 | `-h`、`-?`、`--help` | 显示命令帮助和可用选项。 |
 
@@ -22,6 +23,12 @@ create-cpp-app [选项]
 
 ```bash
 create-cpp-app --version
+```
+
+查看程序所在目录：
+
+```bash
+create-cpp-app --where
 ```
 
 查看帮助：

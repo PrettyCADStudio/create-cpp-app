@@ -10,14 +10,25 @@ public static class Program
         {
             Description = "Force delete existing project directory and recreate",
         };
+        var whereOption = new Option<bool>("--where")
+        {
+            Description = "Print the path of the running create-cpp-app executable",
+        };
 
         var rootCommand = new RootCommand("Create a new C++ CMake project")
         {
             forceOption,
+            whereOption,
         };
 
         rootCommand.SetAction((result) =>
         {
+            if (result.GetValue(whereOption))
+            {
+                Console.WriteLine(Environment.ProcessPath);
+                return;
+            }
+
             var force = result.GetValue(forceOption);
             Run(force);
         });

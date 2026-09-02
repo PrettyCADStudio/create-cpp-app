@@ -82,6 +82,14 @@ create-cpp-app --version
 0.1.1
 ```
 
+## 查看程序所在目录
+
+```bash
+create-cpp-app --where
+```
+
+该命令输出当前正在运行的 `create-cpp-app` 可执行程序的完整路径。
+
 ## 交互式创建示例
 
 运行后会询问：
