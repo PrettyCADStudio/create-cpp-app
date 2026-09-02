@@ -5,11 +5,11 @@
 Use the repository scripts for normal validation:
 
 ```bash
-# Build the CLI (Release by default)
-python build.py
+# Build the C# CLI (Release by default)
+python build-dotnet.py
 
 # Build the CLI in Debug
-python build.py --config Debug
+python build-dotnet.py --config Debug
 
 # Run every fixture-based test
 python test.py

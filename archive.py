@@ -1,4 +1,5 @@
 import argparse
+import glob
 import os
 import platform
 import shutil
@@ -132,12 +133,35 @@ def archive_folder(name, files):
     print(folder_path)
 
 
+def archive_python(version):
+    """Build a platform-specific wheel containing the self-contained C# CLI."""
+    result = subprocess.run(
+        [sys.executable, "-m", "build", "--wheel", "--outdir", DIST_DIR]
+    )
+    if result.returncode != 0:
+        raise RuntimeError("Failed to build the Python wheel")
+
+    wheels = glob.glob(os.path.join(DIST_DIR, f"create_cpp_app-{version}-*.whl"))
+    if not wheels:
+        raise RuntimeError("Python wheel build completed but no wheel was found")
+
+    wheel_path = max(wheels, key=os.path.getmtime)
+    print(f"Archived to {wheel_path}", file=sys.stderr)
+    print(wheel_path)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Archive build output")
-    parser.add_argument("--zip", action="store_true", help="Package as a zip file")
+    parser.add_argument("--zip", action="store_true", help="Package the self-contained application as a ZIP file")
+    parser.add_argument("--python", dest="python_package", action="store_true", help="Build a pip-installable Python wheel")
+    parser.add_argument("--all", action="store_true", help="Build both the ZIP archive and Python wheel")
     args = parser.parse_args()
 
-    if not os.path.isfile(DOCUMENTATION_FILE):
+    create_zip = args.zip or args.all
+    create_python = args.python_package or args.all
+    create_folder = not create_zip and not create_python
+
+    if (create_zip or create_folder) and not os.path.isfile(DOCUMENTATION_FILE):
         print(
             f"Error: documentation file not found at {DOCUMENTATION_FILE}",
             file=sys.stderr,
@@ -147,17 +171,22 @@ def main():
     os.makedirs(DIST_DIR, exist_ok=True)
 
     version = read_version()
-    platform_name = get_platform_name()
-    architecture_name = get_architecture_name()
-    name = f"{APPLICATION_NAME}-v{version}-{platform_name}-{architecture_name}"
-    with tempfile.TemporaryDirectory(prefix="create-cpp-app-publish-") as publish_dir:
-        publish_application(publish_dir)
-        files = collect_files(publish_dir)
 
-        if args.zip:
-            archive_zip(name, files)
-        else:
-            archive_folder(name, files)
+    if create_zip or create_folder:
+        platform_name = get_platform_name()
+        architecture_name = get_architecture_name()
+        name = f"{APPLICATION_NAME}-v{version}-{platform_name}-{architecture_name}"
+        with tempfile.TemporaryDirectory(prefix="create-cpp-app-publish-") as publish_dir:
+            publish_application(publish_dir)
+            files = collect_files(publish_dir)
+
+            if create_zip:
+                archive_zip(name, files)
+            elif create_folder:
+                archive_folder(name, files)
+
+    if create_python:
+        archive_python(version)
 
 
 if __name__ == "__main__":

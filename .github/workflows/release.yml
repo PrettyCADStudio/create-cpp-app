@@ -32,17 +32,19 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - name: Build release package
-        run: python build.py
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Create ZIP archive
-        run: python archive.py --zip
+      - name: Build wheel
+        run: python -m pip wheel . --wheel-dir dist
 
-      - name: Upload release archive
+      - name: Upload release wheel
         uses: actions/upload-artifact@v4
         with:
           name: create-cpp-app-${{ matrix.platform }}
-          path: dist/*.zip
+          path: dist/*.whl
           if-no-files-found: error
 
   release:
@@ -51,16 +53,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download release archives
+      - name: Download release wheels
         uses: actions/download-artifact@v4
         with:
           pattern: create-cpp-app-*
           merge-multiple: true
           path: dist
 
-      - name: Create release and upload archives
+      - name: Create release and upload wheels
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
-          files: dist/*.zip
+          files: dist/*.whl

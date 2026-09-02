@@ -21,8 +21,16 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Build solution
         run: python build.py
 
       - name: Run tests
         run: python test.py
+
+      - name: Build wheel
+        run: python -m pip wheel . --wheel-dir dist

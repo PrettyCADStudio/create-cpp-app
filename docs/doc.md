@@ -30,39 +30,27 @@ create-cpp-app --version
 create-cpp-app --help
 ```
 
-## 从发布包安装
+## 通过 pip 安装
 
-GitHub Release 中的 ZIP 包是针对对应操作系统和架构生成的自包含发布包，包含可执行程序、运行所需文件、`doc.md` 和 `install.py`，无需预先安装 .NET runtime。下载与解压适用于当前操作系统和架构的归档文件后，在解压目录中执行安装脚本：
+GitHub Release 提供与操作系统和 CPU 架构匹配的 wheel，其中已包含自包含的 C# 程序，不需要安装 .NET runtime 或 SDK。下载当前平台对应的 `.whl` 文件后执行：
 
 ```bash
-python install.py
+python -m pip install create_cpp_app-<version>-py3-none-<platform>.whl
 ```
 
-例如，Windows x64 用户应下载名称类似以下的发布资产：
+例如，Windows x64 的 wheel 名称类似：
 
 ```text
-create-cpp-app-v0.1.1-windows-x64.zip
+create_cpp_app-0.1.1-py3-none-win_amd64.whl
 ```
 
-### 安装时的变更
-
-`install.py` 会执行以下操作：
-
-1. 验证发布包，并先将程序文件复制到同一磁盘的临时目录；
-2. 成功后将已有的 `~/.create-cpp-app` 备份并替换为新版本；
-3. 将该安装目录添加到当前用户的 `PATH`。
-
-因此，重新运行安装脚本会覆盖旧版本。请勿将其他个人文件保存在 `~/.create-cpp-app` 中。
-
-在 Windows 上，脚本修改用户级 `PATH`，需要关闭并重新打开终端后才会生效。在 Linux 和 macOS 上，脚本会根据当前 shell 将 PATH 配置追加到相应的 shell 配置文件；重新打开终端，或重新加载该配置文件后即可使用。
-
-安装完成且终端已重新打开后，确认命令可用：
+安装完成后，确认命令可用：
 
 ```bash
 create-cpp-app --version
 ```
 
-如果安装脚本无法识别当前 shell，它会提示手动将 `~/.create-cpp-app` 添加至 PATH。
+pip 会将命令入口安装到当前 Python 环境的 scripts 目录；使用虚拟环境时，请先激活该虚拟环境。可使用 `python -m create_cpp_app` 作为等价入口。
 
 ## 创建项目
 

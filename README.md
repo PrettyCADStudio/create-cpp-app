@@ -21,26 +21,44 @@ create-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工�
 
 ## 环境要求
 
-- .NET 10 SDK 或更高版本
 - Python 3
 - CMake 3.20+
 - 可选：Windows / Linux / macOS
 
+从源码构建 wheel 时还需要 .NET 10 SDK 或更高版本；通过 pip 安装已构建的 wheel 时不需要 .NET runtime 或 SDK。
+
 ## 安装与运行
 
-### 1) 构建当前工具本身
+### 1) 通过 pip 安装
+
+安装与当前操作系统和 CPU 架构匹配的 wheel：
 
 ```bash
-python build.py
+python -m pip install create_cpp_app-<version>-py3-none-<platform>.whl
 ```
 
-默认构建 Release 版本，也可以指定 Debug：
+安装后可直接运行：
 
 ```bash
-python build.py --config Debug
+create-cpp-app
 ```
 
-### 2) 运行 CLI
+也可以使用模块入口：
+
+```bash
+python -m create_cpp_app
+```
+
+### 2) 从源码构建 wheel
+
+```bash
+python -m pip install build
+python -m build --wheel
+```
+
+构建过程会发布一个包含自包含 C# 程序的、与当前平台绑定的 wheel 到 `dist/`。
+
+### 3) 开发时运行 CLI
 
 ```bash
 dotnet run --project src/create-cpp-app/create-cpp-app.csproj
@@ -161,10 +179,10 @@ bin\Release\App.exe
 
 ## 现成脚本
 
-### 构建脚本
+### 构建 C# 开发版本
 
 ```bash
-python build.py
+python build-dotnet.py
 ```
 
 ### 测试脚本
@@ -181,7 +199,7 @@ python test.py
 python archive.py --zip
 ```
 
-默认输出为文件夹归档；如果传入 `--zip`，则生成 zip 包到 `dist/`。
+默认输出为文件夹归档。`--zip` 生成自包含程序的 ZIP 发布包，`--python` 生成可通过 pip 安装的 platform wheel，`--all` 同时生成两者；所有产物均写入 `dist/`。
 
 ### 安装脚本
 
@@ -207,10 +225,13 @@ python clean.py --dist
 
 ```text
 create-cpp-app/
-├── build.py                     # 构建本工具
+├── build-dotnet.py               # 构建 C# 开发版本
 ├── test.py                      # 运行单元测试
 ├── archive.py                   # 创建发布归档
 ├── clean.py                     # 清理中间产物
+├── pyproject.toml                # Python 包构建配置
+├── setup.py                      # 构建时发布并内嵌 C# CLI
+├── python/create_cpp_app/        # pip 安装后的 Python 启动器
 ├── create-cpp-app.slnx          # .NET 解决方案文件
 ├── src/
 │   ├── create-cpp-app/

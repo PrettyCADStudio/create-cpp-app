@@ -62,3 +62,10 @@ nunit-*.xml
 
 # Other
 [Tt]emp/
+
+# Python packaging
+/build/
+*.egg-info/
+*.whl
+__pycache__/
+.venv/

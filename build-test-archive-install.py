@@ -37,7 +37,7 @@ def run_capture(cmd):
 
 def main():
     print("Step 1/4: Build")
-    run([sys.executable, "build.py"])
+    run([sys.executable, "build-dotnet.py"])
 
     print("Step 2/4: Test")
     run(["dotnet", "test", "create-cpp-app.slnx", "--verbosity", "normal"])
