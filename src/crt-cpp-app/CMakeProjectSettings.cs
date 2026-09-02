@@ -1,4 +1,4 @@
-namespace create_cpp_app;
+namespace crt_cpp_app;
 
 public enum PythonScriptMode
 {

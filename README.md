@@ -1,6 +1,6 @@
-# create-cpp-app
+# crt-cpp-app
 
-create-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工具。它会根据用户输入生成可直接构建的项目骨架，并支持静态库、动态库和可执行程序的标准目录结构。
+crt-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工具。它会根据用户输入生成可直接构建的项目骨架，并支持静态库、动态库和可执行程序的标准目录结构。
 
 ## 功能概览
 
@@ -34,19 +34,19 @@ create-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工�
 安装与当前操作系统和 CPU 架构匹配的 wheel：
 
 ```bash
-python -m pip install create_cpp_app-<version>-py3-none-<platform>.whl
+python -m pip install crt_cpp_app-<version>-py3-none-<platform>.whl
 ```
 
 安装后可直接运行：
 
 ```bash
-create-cpp-app
+crt-cpp-app
 ```
 
 也可以使用模块入口：
 
 ```bash
-python -m create_cpp_app
+python -m crt_cpp_app
 ```
 
 ### 2) 从源码构建 wheel
@@ -61,19 +61,19 @@ python -m build --wheel
 ### 3) 开发时运行 CLI
 
 ```bash
-dotnet run --project src/create-cpp-app/create-cpp-app.csproj
+dotnet run --project src/crt-cpp-app/crt-cpp-app.csproj
 ```
 
 或直接使用安装后的命令（如果已执行安装脚本）：
 
 ```bash
-create-cpp-app
+crt-cpp-app
 ```
 
 ## 版本信息
 
 ```bash
-create-cpp-app --version
+crt-cpp-app --version
 ```
 
 输出：
@@ -85,10 +85,10 @@ create-cpp-app --version
 ## 查看程序所在目录
 
 ```bash
-create-cpp-app --where
+crt-cpp-app --where
 ```
 
-该命令输出当前正在运行的 `create-cpp-app` 可执行程序的完整路径。
+该命令输出当前正在运行的 `crt-cpp-app` 可执行程序的完整路径。
 
 ## 交互式创建示例
 
@@ -209,7 +209,7 @@ python archive.py --zip
 
 默认输出为文件夹归档。`--zip` 生成自包含程序的 ZIP 发布包，`--python` 生成可通过 pip 安装的 platform wheel，`--all` 同时生成两者；所有产物均写入 `dist/`。
 
-`--nodejs` 生成可通过 npm 安装的、与当前平台绑定的 `.tgz` 包；安装后同样可直接调用 `create-cpp-app`。`--all` 会同时生成 ZIP、Python wheel 和 Node.js 包。
+`--nodejs` 生成可通过 npm 安装的、与当前平台绑定的 `.tgz` 包；安装后同样可直接调用 `crt-cpp-app`。`--all` 会同时生成 ZIP、Python wheel 和 Node.js 包。
 
 ### 安装脚本
 
@@ -217,7 +217,7 @@ python archive.py --zip
 python src/install.py --source dist/<archive-folder>
 ```
 
-此脚本会先在临时目录验证并复制发布包，成功后再替换用户目录下的 `~/.create-cpp-app`，并尝试更新系统 PATH。
+此脚本会先在临时目录验证并复制发布包，成功后再替换用户目录下的 `~/.crt-cpp-app`，并尝试更新系统 PATH。
 
 ### 清理脚本
 
@@ -225,7 +225,7 @@ python src/install.py --source dist/<archive-folder>
 python clean.py
 ```
 
-清理工具与测试项目的 `obj/` 目录、共享的 `bin/` 构建产物，以及系统临时目录中以 `create-cpp-app-` 开头的残留目录（包括测试和发布过程的临时文件）。如果需要额外清理 `dist`：
+清理工具与测试项目的 `obj/` 目录、共享的 `bin/` 构建产物，以及系统临时目录中以 `crt-cpp-app-` 开头的残留目录（包括测试和发布过程的临时文件）。如果需要额外清理 `dist`：
 
 ```bash
 python clean.py --dist
@@ -234,25 +234,25 @@ python clean.py --dist
 ## 本项目自身结构
 
 ```text
-create-cpp-app/
+crt-cpp-app/
 ├── build-dotnet.py               # 构建 C# 开发版本
 ├── test.py                      # 运行单元测试
 ├── archive.py                   # 创建发布归档
 ├── clean.py                     # 清理中间产物
 ├── pyproject.toml                # Python 包构建配置
 ├── setup.py                      # 构建时发布并内嵌 C# CLI
-├── python/create_cpp_app/        # pip 安装后的 Python 启动器
-├── create-cpp-app.slnx          # .NET 解决方案文件
+├── python/crt_cpp_app/           # pip 安装后的 Python 启动器
+├── crt-cpp-app.slnx             # .NET 解决方案文件
 ├── src/
-│   ├── create-cpp-app/
+│   ├── crt-cpp-app/
 │   │   ├── Program.cs
 │   │   ├── UserInteraction.cs
 │   │   ├── CMakeProjectCreator.cs
 │   │   ├── CMakeProjectSettings.cs
-│   │   └── create-cpp-app.csproj
+│   │   └── crt-cpp-app.csproj
 │   └── install.py               # 安装脚本
 ├── test/
-│   ├── create-cpp-app.Tests/
+│   ├── crt-cpp-app.Tests/
 │   └── fixtures/
 ├── LICENSE
 ├── README.md

@@ -40,7 +40,7 @@ def main():
     run([sys.executable, "build-dotnet.py"])
 
     print("Step 2/4: Test")
-    run(["dotnet", "test", "create-cpp-app.slnx", "--verbosity", "normal"])
+    run(["dotnet", "test", "crt-cpp-app.slnx", "--verbosity", "normal"])
     print("All tests passed.\n")
 
     print("Step 3/4: Archive")

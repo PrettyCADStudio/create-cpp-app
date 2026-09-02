@@ -11,8 +11,8 @@ from setuptools.command.build_py import build_py as _build_py
 
 
 ROOT = Path(__file__).parent.resolve()
-PROJECT_FILE = ROOT / "src" / "create-cpp-app" / "create-cpp-app.csproj"
-PACKAGE_NAME = "create_cpp_app"
+PROJECT_FILE = ROOT / "src" / "crt-cpp-app" / "crt-cpp-app.csproj"
+PACKAGE_NAME = "crt_cpp_app"
 
 
 def read_version() -> str:
@@ -76,7 +76,7 @@ class BinaryDistribution(Distribution):
 
 
 setup(
-    name="create-cpp-app",
+    name="crt-cpp-app",
     version=read_version(),
     description="Create a C++ CMake project from the command line",
     long_description=(ROOT / "README.md").read_text(encoding="utf-8"),
@@ -85,7 +85,7 @@ setup(
     python_requires=">=3.9",
     packages=find_packages("python"),
     package_dir={"": "python"},
-    entry_points={"console_scripts": ["create-cpp-app=create_cpp_app.cli:main"]},
+    entry_points={"console_scripts": ["crt-cpp-app=crt_cpp_app.cli:main"]},
     cmdclass={"build_py": BuildPy, "bdist_wheel": BDistWheel},
     distclass=BinaryDistribution,
 )

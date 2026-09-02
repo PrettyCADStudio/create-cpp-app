@@ -6,7 +6,7 @@ import sys
 import tempfile
 import uuid
 
-INSTALL_DIR = os.path.join(os.path.expanduser("~"), ".create-cpp-app")
+INSTALL_DIR = os.path.join(os.path.expanduser("~"), ".crt-cpp-app")
 
 
 def validate_source(source_dir):
@@ -32,7 +32,7 @@ def copy_files(source_dir, destination_dir):
 
 def replace_installation(staging_dir):
     parent_dir = os.path.dirname(INSTALL_DIR)
-    backup_dir = os.path.join(parent_dir, f".create-cpp-app.backup-{uuid.uuid4().hex}")
+    backup_dir = os.path.join(parent_dir, f".crt-cpp-app.backup-{uuid.uuid4().hex}")
     had_previous_installation = os.path.exists(INSTALL_DIR)
 
     try:
@@ -106,7 +106,7 @@ def add_to_path():
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Install create-cpp-app")
+    parser = argparse.ArgumentParser(description="Install crt-cpp-app")
     parser.add_argument(
         "--source",
         default=os.path.dirname(os.path.abspath(__file__)),
@@ -123,7 +123,7 @@ def main():
     print(f"[1/4] Validated source: {source_dir}")
     parent_dir = os.path.dirname(INSTALL_DIR)
     os.makedirs(parent_dir, exist_ok=True)
-    staging_dir = tempfile.mkdtemp(prefix=".create-cpp-app.staging-", dir=parent_dir)
+    staging_dir = tempfile.mkdtemp(prefix=".crt-cpp-app.staging-", dir=parent_dir)
     try:
         print(f"[2/4] Copying files to temporary directory")
         copy_files(source_dir, staging_dir)
@@ -137,7 +137,7 @@ def main():
     print()
     print("Installation complete!")
     print(f"  Installed to: {INSTALL_DIR}")
-    print(f"  Restart your terminal, then run: create-cpp-app")
+    print(f"  Restart your terminal, then run: crt-cpp-app")
 
 
 if __name__ == "__main__":

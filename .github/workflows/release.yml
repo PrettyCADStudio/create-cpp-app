@@ -48,7 +48,7 @@ jobs:
       - name: Upload release packages
         uses: actions/upload-artifact@v4
         with:
-          name: create-cpp-app-${{ matrix.platform }}
+          name: crt-cpp-app-${{ matrix.platform }}
           path: |
             dist/*.zip
             dist/*.whl
@@ -64,7 +64,7 @@ jobs:
       - name: Download release packages
         uses: actions/download-artifact@v4
         with:
-          pattern: create-cpp-app-*
+          pattern: crt-cpp-app-*
           merge-multiple: true
           path: dist
 

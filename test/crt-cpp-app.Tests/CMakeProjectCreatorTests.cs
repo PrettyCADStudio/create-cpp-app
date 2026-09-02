@@ -2,15 +2,15 @@ using System.Diagnostics;
 using System.Text.Json;
 using Xunit;
 
-namespace create_cpp_app.Tests;
+namespace crt_cpp_app.Tests;
 
 public class CMakeProjectCreatorTests : IDisposable
 {
     private static readonly string _projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-    private readonly string _runDir = Path.Combine(Path.GetTempPath(), "create-cpp-app-tests", Guid.NewGuid().ToString("N"));
+    private readonly string _runDir = Path.Combine(Path.GetTempPath(), "crt-cpp-app-tests", Guid.NewGuid().ToString("N"));
 
     private readonly string _fixturesDir;
-    private const string ConfigFileName = "create-cpp-app.json";
+    private const string ConfigFileName = "crt-cpp-app.json";
 
     public CMakeProjectCreatorTests()
     {

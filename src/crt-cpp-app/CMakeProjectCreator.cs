@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace create_cpp_app;
+namespace crt_cpp_app;
 
 public static class CMakeProjectCreator
 {
@@ -55,8 +55,8 @@ public static class CMakeProjectCreator
         if (!RunGit(settings.ProjectDir, "add", "--all") ||
             !RunGit(
                 settings.ProjectDir,
-                "-c", "user.name=create-cpp-app",
-                "-c", "user.email=create-cpp-app@localhost",
+                "-c", "user.name=crt-cpp-app",
+                "-c", "user.email=crt-cpp-app@localhost",
                 "commit", "-m", "Initial project"))
         {
             Console.Error.WriteLine("Warning: Git repository initialization was not completed.");

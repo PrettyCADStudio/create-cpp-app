@@ -1,6 +1,6 @@
 using Sharprompt;
 
-namespace create_cpp_app;
+namespace crt_cpp_app;
 
 public static class UserInteraction
 {

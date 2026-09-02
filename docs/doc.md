@@ -1,13 +1,13 @@
-# create-cpp-app 使用说明
+# crt-cpp-app 使用说明
 
 ## 简介
 
-`create-cpp-app` 是一个交互式命令行工具，用于快速创建可由 CMake 构建的 C++ 项目。它会生成一个包含可执行程序、静态库、动态库及常用辅助目录的基础工程。
+`crt-cpp-app` 是一个交互式命令行工具，用于快速创建可由 CMake 构建的 C++ 项目。它会生成一个包含可执行程序、静态库、动态库及常用辅助目录的基础工程。
 
 ## 命令格式
 
 ```text
-create-cpp-app [选项]
+crt-cpp-app [选项]
 ```
 
 ## 命令选项
@@ -15,26 +15,26 @@ create-cpp-app [选项]
 | 选项 | 说明 |
 | --- | --- |
 | `-f`、`--force` | 如果同名项目目录已存在，删除该目录并重新创建项目，不再请求确认。 |
-| `--where` | 输出当前正在运行的 `create-cpp-app` 可执行程序的完整路径。 |
+| `--where` | 输出当前正在运行的 `crt-cpp-app` 可执行程序的完整路径。 |
 | `--version` | 显示当前工具版本。 |
 | `-h`、`-?`、`--help` | 显示命令帮助和可用选项。 |
 
 查看版本：
 
 ```bash
-create-cpp-app --version
+crt-cpp-app --version
 ```
 
 查看程序所在目录：
 
 ```bash
-create-cpp-app --where
+crt-cpp-app --where
 ```
 
 查看帮助：
 
 ```bash
-create-cpp-app --help
+crt-cpp-app --help
 ```
 
 ## 通过 pip 安装
@@ -42,39 +42,39 @@ create-cpp-app --help
 GitHub Release 提供与操作系统和 CPU 架构匹配的 wheel，其中已包含自包含的 C# 程序，不需要安装 .NET runtime 或 SDK。下载当前平台对应的 `.whl` 文件后执行：
 
 ```bash
-python -m pip install create_cpp_app-<version>-py3-none-<platform>.whl
+python -m pip install crt_cpp_app-<version>-py3-none-<platform>.whl
 ```
 
 例如，Windows x64 的 wheel 名称类似：
 
 ```text
-create_cpp_app-0.1.1-py3-none-win_amd64.whl
+crt_cpp_app-0.1.1-py3-none-win_amd64.whl
 ```
 
 安装完成后，确认命令可用：
 
 ```bash
-create-cpp-app --version
+crt-cpp-app --version
 ```
 
-pip 会将命令入口安装到当前 Python 环境的 scripts 目录；使用虚拟环境时，请先激活该虚拟环境。可使用 `python -m create_cpp_app` 作为等价入口。
+pip 会将命令入口安装到当前 Python 环境的 scripts 目录；使用虚拟环境时，请先激活该虚拟环境。可使用 `python -m crt_cpp_app` 作为等价入口。
 
 ## 通过 npm 安装
 
 也可以下载当前平台对应的 `.tgz` 包并通过 npm 安装：
 
 ```bash
-npm install --global ./create-cpp-app-win32-x64-<version>.tgz
+npm install --global ./crt-cpp-app-win32-x64-<version>.tgz
 ```
 
-包名会包含目标平台和架构，例如 Windows x64 为 `create-cpp-app-win32-x64`。安装后可直接使用 `create-cpp-app`；npm 包同样内嵌自包含的 C# 程序，因此不需要安装 .NET runtime 或 SDK。
+包名会包含目标平台和架构，例如 Windows x64 为 `crt-cpp-app-win32-x64`。安装后可直接使用 `crt-cpp-app`；npm 包同样内嵌自包含的 C# 程序，因此不需要安装 .NET runtime 或 SDK。
 
 ## 创建项目
 
 在希望存放新项目的目录中运行：
 
 ```bash
-create-cpp-app
+crt-cpp-app
 ```
 
 工具会依次要求输入以下信息：
@@ -107,11 +107,11 @@ Directory 'my-app' already exists. Delete and recreate?
 也可以使用 `--force` 或 `-f` 跳过确认：
 
 ```bash
-create-cpp-app --force
+crt-cpp-app --force
 ```
 
 ```bash
-create-cpp-app -f
+crt-cpp-app -f
 ```
 
 `--force` 会递归删除已有的同名目录及其全部内容，请仅在确认内容可被删除时使用。

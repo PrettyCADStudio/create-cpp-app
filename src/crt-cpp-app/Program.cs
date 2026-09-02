@@ -1,6 +1,6 @@
 using System.CommandLine;
 
-namespace create_cpp_app;
+namespace crt_cpp_app;
 
 public static class Program
 {
@@ -12,7 +12,7 @@ public static class Program
         };
         var whereOption = new Option<bool>("--where")
         {
-            Description = "Print the path of the running create-cpp-app executable",
+            Description = "Print the path of the running crt-cpp-app executable",
         };
 
         var rootCommand = new RootCommand("Create a new C++ CMake project")

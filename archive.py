@@ -9,11 +9,11 @@ import sys
 import tempfile
 import zipfile
 
-PROJECT_FILE = os.path.join("src", "create-cpp-app", "create-cpp-app.csproj")
+PROJECT_FILE = os.path.join("src", "crt-cpp-app", "crt-cpp-app.csproj")
 DIST_DIR = "dist"
 DOCUMENTATION_FILE = os.path.join("docs", "doc.md")
-APPLICATION_NAME = "create-cpp-app"
-NODE_LAUNCHER = os.path.join("nodejs", "bin", "create-cpp-app.js")
+APPLICATION_NAME = "crt-cpp-app"
+NODE_LAUNCHER = os.path.join("nodejs", "crt-cpp-app.js")
 
 
 def read_version():
@@ -143,7 +143,7 @@ def archive_python(version):
     if result.returncode != 0:
         raise RuntimeError("Failed to build the Python wheel")
 
-    wheels = glob.glob(os.path.join(DIST_DIR, f"create_cpp_app-{version}-*.whl"))
+    wheels = glob.glob(os.path.join(DIST_DIR, f"crt_cpp_app-{version}-*.whl"))
     if not wheels:
         raise RuntimeError("Python wheel build completed but no wheel was found")
 
@@ -172,14 +172,14 @@ def archive_nodejs(version):
     node_platform = get_node_platform_name()
     architecture = get_architecture_name()
     package_name = f"{APPLICATION_NAME}-{node_platform}-{architecture}"
-    with tempfile.TemporaryDirectory(prefix="create-cpp-app-node-") as package_dir:
+    with tempfile.TemporaryDirectory(prefix="crt-cpp-app-node-") as package_dir:
         app_dir = os.path.join(package_dir, "app")
         bin_dir = os.path.join(package_dir, "bin")
-        with tempfile.TemporaryDirectory(prefix="create-cpp-app-publish-") as publish_dir:
+        with tempfile.TemporaryDirectory(prefix="crt-cpp-app-publish-") as publish_dir:
             publish_application(publish_dir)
             shutil.copytree(publish_dir, app_dir, ignore=shutil.ignore_patterns("*.pdb"))
         os.makedirs(bin_dir)
-        shutil.copy2(NODE_LAUNCHER, os.path.join(bin_dir, "create-cpp-app.js"))
+        shutil.copy2(NODE_LAUNCHER, os.path.join(bin_dir, "crt-cpp-app.js"))
 
         package_json = {
             "name": package_name,
@@ -188,7 +188,7 @@ def archive_nodejs(version):
             "license": "MIT",
             "os": [node_platform],
             "cpu": [architecture],
-            "bin": {APPLICATION_NAME: "bin/create-cpp-app.js"},
+            "bin": {APPLICATION_NAME: "bin/crt-cpp-app.js"},
             "files": ["app/", "bin/"],
         }
         with open(os.path.join(package_dir, "package.json"), "w", encoding="utf-8", newline="\n") as package_file:
@@ -249,7 +249,7 @@ def main():
         platform_name = get_platform_name()
         architecture_name = get_architecture_name()
         name = f"{APPLICATION_NAME}-v{version}-{platform_name}-{architecture_name}"
-        with tempfile.TemporaryDirectory(prefix="create-cpp-app-publish-") as publish_dir:
+        with tempfile.TemporaryDirectory(prefix="crt-cpp-app-publish-") as publish_dir:
             publish_application(publish_dir)
             files = collect_files(publish_dir)
 

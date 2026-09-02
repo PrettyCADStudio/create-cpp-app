@@ -4,7 +4,7 @@ import sys
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build create-cpp-app solution")
+    parser = argparse.ArgumentParser(description="Build crt-cpp-app solution")
     parser.add_argument(
         "--config",
         choices=["Debug", "Release"],
@@ -14,7 +14,7 @@ def main():
     args = parser.parse_args()
 
     result = subprocess.run(
-        ["dotnet", "build", "create-cpp-app.slnx", "-c", args.config]
+        ["dotnet", "build", "crt-cpp-app.slnx", "-c", args.config]
     )
     sys.exit(result.returncode)
 

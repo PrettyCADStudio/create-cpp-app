@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/crt-cpp-app/crt-cpp-app.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/crt-cpp-app.Tests/crt-cpp-app.Tests.csproj" />
+  </Folder>
+</Solution>

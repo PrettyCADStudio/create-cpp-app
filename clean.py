@@ -5,8 +5,9 @@ import tempfile
 
 CLEAN_DIRS = [
     "bin",
-    os.path.join("src", "create-cpp-app", "obj"),
-    os.path.join("test", "create-cpp-app.Tests", "obj"),
+    "build",
+    os.path.join("src", "crt-cpp-app", "obj"),
+    os.path.join("test", "crt-cpp-app.Tests", "obj"),
 ]
 
 
@@ -20,7 +21,7 @@ def remove_dir(path):
 
 def remove_project_temp_dirs():
     temp_dir = tempfile.gettempdir()
-    prefix = "create-cpp-app-"
+    prefix = "crt-cpp-app-"
 
     for entry in os.scandir(temp_dir):
         if entry.name.startswith(prefix) and entry.is_dir(follow_symlinks=False):
@@ -38,7 +39,7 @@ def main():
     for d in CLEAN_DIRS:
         remove_dir(d)
 
-    print("Cleaning create-cpp-app system temporary directories...")
+    print("Cleaning crt-cpp-app system temporary directories...")
     remove_project_temp_dirs()
 
     if args.dist:
