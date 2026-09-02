@@ -201,6 +201,8 @@ python archive.py --zip
 
 默认输出为文件夹归档。`--zip` 生成自包含程序的 ZIP 发布包，`--python` 生成可通过 pip 安装的 platform wheel，`--all` 同时生成两者；所有产物均写入 `dist/`。
 
+`--nodejs` 生成可通过 npm 安装的、与当前平台绑定的 `.tgz` 包；安装后同样可直接调用 `create-cpp-app`。`--all` 会同时生成 ZIP、Python wheel 和 Node.js 包。
+
 ### 安装脚本
 
 ```bash

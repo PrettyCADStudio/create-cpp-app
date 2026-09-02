@@ -1,5 +1,6 @@
 import argparse
 import glob
+import json
 import os
 import platform
 import shutil
@@ -12,6 +13,7 @@ PROJECT_FILE = os.path.join("src", "create-cpp-app", "create-cpp-app.csproj")
 DIST_DIR = "dist"
 DOCUMENTATION_FILE = os.path.join("docs", "doc.md")
 APPLICATION_NAME = "create-cpp-app"
+NODE_LAUNCHER = os.path.join("nodejs", "bin", "create-cpp-app.js")
 
 
 def read_version():
@@ -150,16 +152,87 @@ def archive_python(version):
     print(wheel_path)
 
 
+def get_node_platform_name():
+    node_platforms = {
+        "Darwin": "darwin",
+        "Linux": "linux",
+        "Windows": "win32",
+    }
+    node_platform = node_platforms.get(platform.system())
+    if not node_platform:
+        raise RuntimeError(f"Unsupported Node.js platform: {platform.system()}")
+    return node_platform
+
+
+def archive_nodejs(version):
+    """Build a platform-specific npm package containing the C# application."""
+    if not os.path.isfile(NODE_LAUNCHER):
+        raise RuntimeError(f"Node.js launcher not found: {NODE_LAUNCHER}")
+
+    node_platform = get_node_platform_name()
+    architecture = get_architecture_name()
+    package_name = f"{APPLICATION_NAME}-{node_platform}-{architecture}"
+    with tempfile.TemporaryDirectory(prefix="create-cpp-app-node-") as package_dir:
+        app_dir = os.path.join(package_dir, "app")
+        bin_dir = os.path.join(package_dir, "bin")
+        with tempfile.TemporaryDirectory(prefix="create-cpp-app-publish-") as publish_dir:
+            publish_application(publish_dir)
+            shutil.copytree(publish_dir, app_dir, ignore=shutil.ignore_patterns("*.pdb"))
+        os.makedirs(bin_dir)
+        shutil.copy2(NODE_LAUNCHER, os.path.join(bin_dir, "create-cpp-app.js"))
+
+        package_json = {
+            "name": package_name,
+            "version": version,
+            "description": "Create a C++ CMake project from the command line",
+            "license": "MIT",
+            "os": [node_platform],
+            "cpu": [architecture],
+            "bin": {APPLICATION_NAME: "bin/create-cpp-app.js"},
+            "files": ["app/", "bin/"],
+        }
+        with open(os.path.join(package_dir, "package.json"), "w", encoding="utf-8", newline="\n") as package_file:
+            json.dump(package_json, package_file, indent=2)
+            package_file.write("\n")
+
+        try:
+            result = subprocess.run(
+                ["npm.cmd" if os.name == "nt" else "npm", "pack", "--json"],
+                cwd=package_dir,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+        except FileNotFoundError as error:
+            raise RuntimeError("npm was not found; install Node.js to create an npm package") from error
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "Failed to create the npm package")
+
+        try:
+            package_filename = json.loads(result.stdout)[0]["filename"]
+        except (IndexError, json.JSONDecodeError, KeyError) as error:
+            raise RuntimeError("npm pack did not report the generated package filename") from error
+
+        source_path = os.path.join(package_dir, package_filename)
+        target_path = os.path.join(DIST_DIR, package_filename)
+        shutil.move(source_path, target_path)
+
+    print(f"Archived to {target_path}", file=sys.stderr)
+    print(target_path)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Archive build output")
     parser.add_argument("--zip", action="store_true", help="Package the self-contained application as a ZIP file")
     parser.add_argument("--python", dest="python_package", action="store_true", help="Build a pip-installable Python wheel")
-    parser.add_argument("--all", action="store_true", help="Build both the ZIP archive and Python wheel")
+    parser.add_argument("--nodejs", action="store_true", help="Build an npm-installable Node.js package")
+    parser.add_argument("--all", action="store_true", help="Build the ZIP archive, Python wheel, and Node.js package")
     args = parser.parse_args()
 
     create_zip = args.zip or args.all
     create_python = args.python_package or args.all
-    create_folder = not create_zip and not create_python
+    create_nodejs = args.nodejs or args.all
+    create_folder = not create_zip and not create_python and not create_nodejs
 
     if (create_zip or create_folder) and not os.path.isfile(DOCUMENTATION_FILE):
         print(
@@ -187,6 +260,9 @@ def main():
 
     if create_python:
         archive_python(version)
+
+    if create_nodejs:
+        archive_nodejs(version)
 
 
 if __name__ == "__main__":
