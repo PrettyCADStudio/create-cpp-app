@@ -138,7 +138,7 @@ def archive_folder(name, files):
 def archive_python(version):
     """Build a platform-specific wheel containing the self-contained C# CLI."""
     result = subprocess.run(
-        [sys.executable, "-m", "build", "--wheel", "--outdir", DIST_DIR]
+        [sys.executable, "-m", "pip", "wheel", ".", "--wheel-dir", DIST_DIR, "--no-deps"],
     )
     if result.returncode != 0:
         raise RuntimeError("Failed to build the Python wheel")
