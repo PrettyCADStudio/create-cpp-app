@@ -67,5 +67,44 @@ public static class UserInteraction
         {
             Console.WriteLine($"  Python scripts: {settings.PythonScripts}");
         }
+
+        PrintNextSteps(settings);
+    }
+
+    private static void PrintNextSteps(CMakeProjectSettings settings)
+    {
+        Console.WriteLine();
+        Console.WriteLine("Next steps:");
+        Console.WriteLine($"  cd {settings.ProjectName}");
+
+        switch (settings.PythonScripts)
+        {
+            case PythonScriptMode.Direct:
+                Console.WriteLine();
+                Console.WriteLine("Build with the generated Python script:");
+                Console.WriteLine("  python build.py --config Release");
+                Console.WriteLine("  python install.py --config Release --prefix install");
+                Console.WriteLine("  python archive.py --config Release");
+                break;
+
+            case PythonScriptMode.Pipenv:
+                Console.WriteLine();
+                Console.WriteLine("Build with Pipenv:");
+                Console.WriteLine("  pipenv run build --config Release");
+                Console.WriteLine("  pipenv run install --config Release --prefix install");
+                Console.WriteLine("  pipenv run archive --config Release");
+                break;
+
+            default:
+                Console.WriteLine();
+                Console.WriteLine("Build with CMake:");
+                Console.WriteLine("  cmake -S . -B build");
+                Console.WriteLine("  cmake --build build --config Release");
+                break;
+        }
+
+        Console.WriteLine();
+        Console.WriteLine("Run the application:");
+        Console.WriteLine("  bin/Release/App");
     }
 }
