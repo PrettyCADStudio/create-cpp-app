@@ -48,7 +48,7 @@ python -m pip install crt_cpp_app-<version>-py3-none-<platform>.whl
 例如，Windows x64 的 wheel 名称类似：
 
 ```text
-crt_cpp_app-0.1.1-py3-none-win_amd64.whl
+crt_cpp_app-0.1.2-py3-none-win_amd64.whl
 ```
 
 安装完成后，确认命令可用：
