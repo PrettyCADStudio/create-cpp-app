@@ -195,6 +195,15 @@ bin\Release\App.exe
 python build-dotnet.py
 ```
 
+### 读取或更新版本
+
+```bash
+python version.py
+python version.py --update 0.1.9
+```
+
+无参数时输出 `crt-cpp-app.csproj` 的 `Version`。`--update` 仅接受三段或四段数字版本号，并会同步更新 `Version`、`AssemblyVersion`、`FileVersion` 和 `InformationalVersion`。
+
 ### 测试脚本
 
 ```bash

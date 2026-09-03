@@ -77,6 +77,14 @@ dotnet tool install --global crt-cpp-app
 
 ## 发布到 nuget.org
 
+更新发布版本时，可运行：
+
+```bash
+python version.py --update 0.1.9
+```
+
+`version.py` 无参数时输出当前版本；`--update` 会同步更新项目文件内的 `Version`、`AssemblyVersion`、`FileVersion` 和 `InformationalVersion`。该参数仅接受三段或四段数字版本号。
+
 将版本 tag（例如 `v0.1.8`）推送到 GitHub 后，发布工作流会构建代码、打包 NuGet 全局工具并发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。仓库管理员须先在 GitHub 的 **Settings → Secrets and variables → Actions** 添加名为 `NUGET_API_KEY` 的 repository secret，其值为 nuget.org 的 package push API key。相同版本已存在时会被安全跳过。
 
 工作流也会发布 Python wheel 到 PyPI。请在相同页面添加 `PYPI_API_TOKEN` repository secret，其值为 PyPI 的 API token。首次发布前，`crt-cpp-app` 这一 PyPI 项目名必须已由该 token 对应的账号或组织拥有；已有的 wheel 会自动跳过。
