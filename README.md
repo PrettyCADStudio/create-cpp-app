@@ -27,6 +27,8 @@ crt-cpp-app 是一个用于快速生成 C++ CMake 项目的 CLI 脚手架工具�
 
 从源码构建 wheel 时还需要 .NET 10 SDK 或更高版本；通过 pip 安装已构建的 wheel 时不需要 .NET runtime 或 SDK。
 
+Linux wheel 采用 `manylinux_2_17` 标签，要求系统使用 glibc 2.17 或更高版本。
+
 ## 安装与运行
 
 ### 1) 通过 pip 安装
@@ -79,7 +81,7 @@ crt-cpp-app --version
 输出：
 
 ```text
-0.1.4
+0.1.5
 ```
 
 ## 查看程序所在目录
@@ -213,7 +215,7 @@ python archive.py --zip
 
 ### 发布 NuGet 包
 
-推送形如 `v0.1.4` 的版本 tag 会触发 GitHub Actions：它会在 Windows、Linux 和 macOS 上构建发布包，并在 Linux 上重新打包一次 NuGet 全局工具后发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。发布前，请在仓库的 **Settings → Secrets and variables → Actions** 中创建 `NUGET_API_KEY` secret，值为 nuget.org 为该包创建的 package push API key。工作流使用 `--skip-duplicate`，因此已发布的相同版本不会导致重试失败。
+推送形如 `v0.1.5` 的版本 tag 会触发 GitHub Actions：它会在 Windows、Linux 和 macOS 上构建发布包，并在 Linux 上重新打包一次 NuGet 全局工具后发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。发布前，请在仓库的 **Settings → Secrets and variables → Actions** 中创建 `NUGET_API_KEY` secret，值为 nuget.org 为该包创建的 package push API key。工作流使用 `--skip-duplicate`，因此已发布的相同版本不会导致重试失败。
 
 同一个工作流也会将三个平台的 Python wheel 发布到 PyPI。请在同一位置创建 `PYPI_API_TOKEN` secret，值为 PyPI 创建的 API token；首次发布前还应确认 PyPI 上的 `crt-cpp-app` 项目名归当前账号或组织所有。已存在的 wheel 会被跳过。
 

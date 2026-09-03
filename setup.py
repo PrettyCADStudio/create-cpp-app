@@ -65,6 +65,12 @@ class BDistWheel(_bdist_wheel):
 
     def get_tag(self):
         _, _, platform_tag = super().get_tag()
+        # PyPI rejects the generic ``linux_<architecture>`` tag.  The bundled
+        # self-contained .NET application supports the manylinux 2.17 glibc
+        # baseline, so advertise that compatible platform tag instead.
+        if platform.system() == "Linux" and platform_tag.startswith("linux_"):
+            architecture = platform_tag.removeprefix("linux_")
+            platform_tag = f"manylinux_2_17_{architecture}"
         return "py3", "none", platform_tag
 
 
