@@ -213,7 +213,10 @@ jobs:
               echo "$package_name@$package_version is already published; skipping."
               continue
             fi
-            npm publish "./$package" --access public --registry "https://registry.npmjs.org"
+            if ! npm publish "./$package" --access public --registry "https://registry.npmjs.org"; then
+              echo "::error::Failed to publish $package_name. If npm reported EOTP, replace NPM_TOKEN with an automation token or a granular token that has Bypass 2FA enabled."
+              exit 1
+            fi
           done
 
   release:

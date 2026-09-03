@@ -81,7 +81,7 @@ crt-cpp-app --version
 输出：
 
 ```text
-0.1.7
+0.1.8
 ```
 
 ## 查看程序所在目录
@@ -215,11 +215,11 @@ python archive.py --zip
 
 ### 发布 NuGet 包
 
-推送形如 `v0.1.7` 的版本 tag 会触发 GitHub Actions：它会在 Windows、Linux 和 macOS 上构建发布包，并在 Linux 上重新打包一次 NuGet 全局工具后发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。发布前，请在仓库的 **Settings → Secrets and variables → Actions** 中创建 `NUGET_API_KEY` secret，值为 nuget.org 为该包创建的 package push API key。工作流使用 `--skip-duplicate`，因此已发布的相同版本不会导致重试失败。
+推送形如 `v0.1.8` 的版本 tag 会触发 GitHub Actions：它会在 Windows、Linux 和 macOS 上构建发布包，并在 Linux 上重新打包一次 NuGet 全局工具后发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。发布前，请在仓库的 **Settings → Secrets and variables → Actions** 中创建 `NUGET_API_KEY` secret，值为 nuget.org 为该包创建的 package push API key。工作流使用 `--skip-duplicate`，因此已发布的相同版本不会导致重试失败。
 
 同一个工作流也会将三个平台的 Python wheel 发布到 PyPI。请在同一位置创建 `PYPI_API_TOKEN` secret，值为 PyPI 创建的 API token；首次发布前还应确认 PyPI 上的 `crt-cpp-app` 项目名归当前账号或组织所有。已存在的 wheel 会被跳过。
 
-同一个工作流还会将 Windows、Linux 和 macOS 对应的 npm 包发布到 npmjs.com。请创建 `NPM_TOKEN` secret，值为具备发布权限且可用于自动化的 npm access token。当前三个包名分别为 `crt-cpp-app-win32-x64`、`crt-cpp-app-linux-x64` 和 `crt-cpp-app-darwin-arm64`；它们都必须归该 token 对应的 npm 账号或组织所有。重跑工作流时，已存在的包版本会被跳过。
+同一个工作流还会将 Windows、Linux 和 macOS 对应的 npm 包发布到 npmjs.com。请创建 `NPM_TOKEN` secret，值为具备发布权限的 npm automation token，或已启用 **Bypass 2FA** 的 granular access token；普通 token 会因 npm 要求一次性验证码（`EOTP`）而无法在 CI 中发布。当前三个包名分别为 `crt-cpp-app-win32-x64`、`crt-cpp-app-linux-x64` 和 `crt-cpp-app-darwin-arm64`；它们都必须归该 token 对应的 npm 账号或组织所有。重跑工作流时，已存在的包版本会被跳过。
 
 ### 安装脚本
 
