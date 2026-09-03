@@ -93,7 +93,7 @@ dotnet tool install --global crt-cpp-app --version <version> --add-source ./dist
 
 工作流也会发布 Python wheel 到 PyPI。请在相同页面添加 `PYPI_API_TOKEN` repository secret，其值为 PyPI 的 API token。首次发布前，`crt-cpp-app` 这一 PyPI 项目名必须已由该 token 对应的账号或组织拥有；已有的 wheel 会自动跳过。
 
-工作流还会发布各平台的 npm 包。请添加 `NPM_TOKEN` repository secret，其值为拥有发布权限、可用于自动化的 npm access token。发布的包名为 `crt-cpp-app-win32-x64`、`crt-cpp-app-linux-x64` 和 `crt-cpp-app-darwin-x64`；首次发布前，它们必须归该 token 对应的 npm 账号或组织所有。已有版本会自动跳过。
+工作流还会发布各平台的 npm 包。请添加 `NPM_TOKEN` repository secret，其值为拥有发布权限、可用于自动化的 npm access token。当前发布的包名为 `crt-cpp-app-win32-x64`、`crt-cpp-app-linux-x64` 和 `crt-cpp-app-darwin-arm64`；首次发布前，它们必须归该 token 对应的 npm 账号或组织所有。已有版本会自动跳过。
 
 ## 创建项目
 

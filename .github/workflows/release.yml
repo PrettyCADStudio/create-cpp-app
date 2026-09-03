@@ -216,7 +216,7 @@ jobs:
               echo "$package_name@$package_version is already published; skipping."
               continue
             fi
-            npm publish "$package" --access public --registry "https://registry.npmjs.org"
+            npm publish "./$package" --access public --registry "https://registry.npmjs.org"
           done
 
   release:

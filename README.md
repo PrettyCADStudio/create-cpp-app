@@ -219,7 +219,7 @@ python archive.py --zip
 
 同一个工作流也会将三个平台的 Python wheel 发布到 PyPI。请在同一位置创建 `PYPI_API_TOKEN` secret，值为 PyPI 创建的 API token；首次发布前还应确认 PyPI 上的 `crt-cpp-app` 项目名归当前账号或组织所有。已存在的 wheel 会被跳过。
 
-同一个工作流还会将 Windows、Linux 和 macOS 对应的 npm 包发布到 npmjs.com。请创建 `NPM_TOKEN` secret，值为具备发布权限且可用于自动化的 npm access token。三个包名分别为 `crt-cpp-app-win32-x64`、`crt-cpp-app-linux-x64` 和 `crt-cpp-app-darwin-x64`；它们都必须归该 token 对应的 npm 账号或组织所有。重跑工作流时，已存在的包版本会被跳过。
+同一个工作流还会将 Windows、Linux 和 macOS 对应的 npm 包发布到 npmjs.com。请创建 `NPM_TOKEN` secret，值为具备发布权限且可用于自动化的 npm access token。当前三个包名分别为 `crt-cpp-app-win32-x64`、`crt-cpp-app-linux-x64` 和 `crt-cpp-app-darwin-arm64`；它们都必须归该 token 对应的 npm 账号或组织所有。重跑工作流时，已存在的包版本会被跳过。
 
 ### 安装脚本
 
