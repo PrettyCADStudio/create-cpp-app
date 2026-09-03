@@ -43,7 +43,7 @@ jobs:
           node-version: "22"
 
       - name: Build release packages
-        run: python archive.py --all
+        run: python archive.py --zip --python --nodejs
 
       - name: Upload release packages
         uses: actions/upload-artifact@v4
@@ -52,13 +52,56 @@ jobs:
           path: |
             dist/*.zip
             dist/*.whl
-            dist/*.nupkg
             dist/*.tgz
           if-no-files-found: error
 
+  publish-nuget:
+    name: Publish NuGet package
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Verify tag matches package version
+        shell: bash
+        run: |
+          package_version="$(dotnet msbuild src/crt-cpp-app/crt-cpp-app.csproj -nologo -getProperty:Version)"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$package_version" != "$tag_version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package version $package_version."
+            exit 1
+          fi
+
+      - name: Pack NuGet tool
+        run: dotnet pack src/crt-cpp-app/crt-cpp-app.csproj --configuration Release --output dist
+
+      - name: Upload NuGet package
+        uses: actions/upload-artifact@v4
+        with:
+          name: crt-cpp-app-nuget
+          path: dist/*.nupkg
+          if-no-files-found: error
+
+      - name: Publish NuGet package
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "::error::Repository secret NUGET_API_KEY is required to publish to nuget.org."
+            exit 1
+          fi
+          dotnet nuget push "dist/*.nupkg" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
+
   release:
     name: Publish release
-    needs: build
+    needs: [build, publish-nuget]
     runs-on: ubuntu-latest
 
     steps:

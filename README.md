@@ -211,6 +211,10 @@ python archive.py --zip
 
 `--nuget` 生成可供 .NET 项目使用的 `.nupkg` 包。`--nodejs` 生成可通过 npm 安装的、与当前平台绑定的 `.tgz` 包；安装后同样可直接调用 `crt-cpp-app`。`--all` 会同时生成 ZIP、Python wheel、NuGet 和 Node.js 包。
 
+### 发布 NuGet 包
+
+推送形如 `v0.1.2` 的版本 tag 会触发 GitHub Actions：它会在 Windows、Linux 和 macOS 上构建发布包，并在 Linux 上重新打包一次 NuGet 全局工具后发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。发布前，请在仓库的 **Settings → Secrets and variables → Actions** 中创建 `NUGET_API_KEY` secret，值为 nuget.org 为该包创建的 package push API key。工作流使用 `--skip-duplicate`，因此已发布的相同版本不会导致重试失败。
+
 ### 安装脚本
 
 ```bash

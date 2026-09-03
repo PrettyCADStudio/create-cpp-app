@@ -85,6 +85,10 @@ dotnet tool install --global crt-cpp-app --version <version> --add-source ./dist
 
 安装后执行 `crt-cpp-app`。如果只需要当前目录使用，可以将 `--global` 替换为 `--tool-path <目录>`。
 
+## 发布到 nuget.org
+
+将版本 tag（例如 `v0.1.2`）推送到 GitHub 后，发布工作流会构建代码、打包 NuGet 全局工具并发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。仓库管理员须先在 GitHub 的 **Settings → Secrets and variables → Actions** 添加名为 `NUGET_API_KEY` 的 repository secret，其值为 nuget.org 的 package push API key。相同版本已存在时会被安全跳过。
+
 ## 创建项目
 
 在希望存放新项目的目录中运行：
