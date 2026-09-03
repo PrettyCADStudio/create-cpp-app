@@ -39,18 +39,12 @@ crt-cpp-app --help
 
 ## 通过 pip 安装
 
-GitHub Release 提供与操作系统和 CPU 架构匹配的 wheel，其中已包含自包含的 C# 程序，不需要安装 .NET runtime 或 SDK。下载当前平台对应的 `.whl` 文件后执行：
+PyPI 提供与操作系统和 CPU 架构匹配的 wheel，其中已包含自包含的 C# 程序，不需要安装 .NET runtime 或 SDK。直接安装即可由 pip 选择当前平台的 wheel：
 
 Linux wheel 使用 `manylinux_2_17` 平台标签，因此要求 glibc 2.17 或更高版本。
 
 ```bash
-python -m pip install crt_cpp_app-<version>-py3-none-<platform>.whl
-```
-
-例如，Windows x64 的 wheel 名称类似：
-
-```text
-crt_cpp_app-0.1.6-py3-none-win_amd64.whl
+python -m pip install crt-cpp-app
 ```
 
 安装完成后，确认命令可用：
@@ -63,33 +57,27 @@ pip 会将命令入口安装到当前 Python 环境的 scripts 目录；使用�
 
 ## 通过 npm 安装
 
-也可以下载当前平台对应的 `.tgz` 包并通过 npm 安装：
+通过 npm 安装与当前平台对应的包：
 
 ```bash
-npm install --global ./crt-cpp-app-win32-x64-<version>.tgz
+npm install --global crt-cpp-app-win32-x64
 ```
 
 包名会包含目标平台和架构，例如 Windows x64 为 `crt-cpp-app-win32-x64`。安装后可直接使用 `crt-cpp-app`；npm 包同样内嵌自包含的 C# 程序，因此不需要安装 .NET runtime 或 SDK。
 
 ## 通过 NuGet 使用
 
-可通过打包脚本生成 `.nupkg` 文件：
+通过 nuget.org 安装 .NET 全局工具：
 
 ```bash
-python archive.py --nuget
-```
-
-将生成的 `dist/crt-cpp-app.<version>.nupkg` 所在目录作为 NuGet 源后，可安装为 .NET 全局工具：
-
-```bash
-dotnet tool install --global crt-cpp-app --version <version> --add-source ./dist
+dotnet tool install --global crt-cpp-app
 ```
 
 安装后执行 `crt-cpp-app`。如果只需要当前目录使用，可以将 `--global` 替换为 `--tool-path <目录>`。
 
 ## 发布到 nuget.org
 
-将版本 tag（例如 `v0.1.6`）推送到 GitHub 后，发布工作流会构建代码、打包 NuGet 全局工具并发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。仓库管理员须先在 GitHub 的 **Settings → Secrets and variables → Actions** 添加名为 `NUGET_API_KEY` 的 repository secret，其值为 nuget.org 的 package push API key。相同版本已存在时会被安全跳过。
+将版本 tag（例如 `v0.1.7`）推送到 GitHub 后，发布工作流会构建代码、打包 NuGet 全局工具并发布到 nuget.org。tag 去掉 `v` 后必须与项目的 `Version` 一致。仓库管理员须先在 GitHub 的 **Settings → Secrets and variables → Actions** 添加名为 `NUGET_API_KEY` 的 repository secret，其值为 nuget.org 的 package push API key。相同版本已存在时会被安全跳过。
 
 工作流也会发布 Python wheel 到 PyPI。请在相同页面添加 `PYPI_API_TOKEN` repository secret，其值为 PyPI 的 API token。首次发布前，`crt-cpp-app` 这一 PyPI 项目名必须已由该 token 对应的账号或组织拥有；已有的 wheel 会自动跳过。
 
