@@ -13,6 +13,7 @@ PROJECT_FILE = os.path.join("src", "crt-cpp-app", "crt-cpp-app.csproj")
 DIST_DIR = "dist"
 DOCUMENTATION_FILE = os.path.join("docs", "doc.md")
 APPLICATION_NAME = "crt-cpp-app"
+NPM_PACKAGE_SCOPE = "@prettycadstudio"
 NODE_LAUNCHER = os.path.join("nodejs", "crt-cpp-app.js")
 
 
@@ -188,7 +189,7 @@ def archive_nodejs(version):
 
     node_platform = get_node_platform_name()
     architecture = get_architecture_name()
-    package_name = f"{APPLICATION_NAME}-{node_platform}-{architecture}"
+    package_name = f"{NPM_PACKAGE_SCOPE}/{APPLICATION_NAME}-{node_platform}-{architecture}"
     with tempfile.TemporaryDirectory(prefix="crt-cpp-app-node-") as package_dir:
         app_dir = os.path.join(package_dir, "app")
         bin_dir = os.path.join(package_dir, "bin")
