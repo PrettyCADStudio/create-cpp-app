@@ -62,6 +62,13 @@ jobs:
           path: dist/*.whl
           if-no-files-found: error
 
+      - name: Upload Node.js package
+        uses: actions/upload-artifact@v4
+        with:
+          name: crt-cpp-app-nodejs-${{ matrix.platform }}
+          path: dist/*.tgz
+          if-no-files-found: error
+
   publish-nuget:
     name: Publish NuGet package
     needs: build
@@ -154,9 +161,67 @@ jobs:
           packages-dir: dist
           skip-existing: true
 
+  publish-npm:
+    name: Publish Node.js packages
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Download Node.js packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: crt-cpp-app-nodejs-*
+          merge-multiple: true
+          path: dist
+
+      - name: Verify npm token
+        shell: bash
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NPM_TOKEN" ]; then
+            echo "::error::Repository secret NPM_TOKEN is required to publish to npm."
+            exit 1
+          fi
+
+      - name: Verify and publish Node.js packages
+        shell: bash
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          shopt -s nullglob
+          packages=(dist/*.tgz)
+          if [ "${#packages[@]}" -eq 0 ]; then
+            echo "::error::No Node.js packages were downloaded."
+            exit 1
+          fi
+
+          tag_version="${GITHUB_REF_NAME#v}"
+          for package in "${packages[@]}"; do
+            read -r package_name package_version < <(
+              tar -xOf "$package" package/package.json |
+                node -e 'const pkg = JSON.parse(require("node:fs").readFileSync(0, "utf8")); console.log(`${pkg.name} ${pkg.version}`);'
+            )
+            if [ "$package_version" != "$tag_version" ]; then
+              echo "::error::Package $package_name has version $package_version, but tag $GITHUB_REF_NAME was pushed."
+              exit 1
+            fi
+            if npm view "$package_name@$package_version" version --registry "https://registry.npmjs.org" >/dev/null 2>&1; then
+              echo "$package_name@$package_version is already published; skipping."
+              continue
+            fi
+            npm publish "$package" --access public --registry "https://registry.npmjs.org"
+          done
+
   release:
     name: Publish release
-    needs: [build, publish-nuget, publish-pypi]
+    needs: [build, publish-nuget, publish-pypi, publish-npm]
     runs-on: ubuntu-latest
 
     steps:
