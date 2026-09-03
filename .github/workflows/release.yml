@@ -48,11 +48,18 @@ jobs:
       - name: Upload release packages
         uses: actions/upload-artifact@v4
         with:
-          name: crt-cpp-app-${{ matrix.platform }}
+          name: crt-cpp-app-release-${{ matrix.platform }}
           path: |
             dist/*.zip
             dist/*.whl
             dist/*.tgz
+          if-no-files-found: error
+
+      - name: Upload Python package
+        uses: actions/upload-artifact@v4
+        with:
+          name: crt-cpp-app-python-${{ matrix.platform }}
+          path: dist/*.whl
           if-no-files-found: error
 
   publish-nuget:
@@ -99,17 +106,71 @@ jobs:
           fi
           dotnet nuget push "dist/*.nupkg" --api-key "$NUGET_API_KEY" --source "https://api.nuget.org/v3/index.json" --skip-duplicate
 
+  publish-pypi:
+    name: Publish Python packages
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify tag matches Python package version
+        shell: bash
+        run: |
+          package_version="$(python setup.py --version)"
+          tag_version="${GITHUB_REF_NAME#v}"
+          if [ "$package_version" != "$tag_version" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match Python package version $package_version."
+            exit 1
+          fi
+
+      - name: Download Python packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: crt-cpp-app-python-*
+          merge-multiple: true
+          path: dist
+
+      - name: Verify PyPI token
+        shell: bash
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          if [ -z "$PYPI_API_TOKEN" ]; then
+            echo "::error::Repository secret PYPI_API_TOKEN is required to publish to PyPI."
+            exit 1
+          fi
+
+      - name: Publish Python packages to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: dist
+          skip-existing: true
+
   release:
     name: Publish release
-    needs: [build, publish-nuget]
+    needs: [build, publish-nuget, publish-pypi]
     runs-on: ubuntu-latest
 
     steps:
       - name: Download release packages
         uses: actions/download-artifact@v4
         with:
-          pattern: crt-cpp-app-*
+          pattern: crt-cpp-app-release-*
           merge-multiple: true
+          path: dist
+
+      - name: Download NuGet package
+        uses: actions/download-artifact@v4
+        with:
+          name: crt-cpp-app-nuget
           path: dist
 
       - name: Create release and upload packages
