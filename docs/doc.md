@@ -77,10 +77,12 @@ dotnet tool install --global crt-cpp-app
 
 ## 发布到 nuget.org
 
+仓库级 Python 脚本使用 Pipenv 管理环境。首次使用前请安装 Pipenv，并在仓库根目录执行 `pipenv install --dev --deploy`。
+
 更新发布版本时，可运行：
 
 ```bash
-python version.py --update 0.1.9
+pipenv run version --update 0.1.9
 ```
 
 `version.py` 无参数时输出当前版本；`--update` 会同步更新项目文件内的 `Version`、`AssemblyVersion`、`FileVersion` 和 `InformationalVersion`。该参数仅接受三段或四段数字版本号。

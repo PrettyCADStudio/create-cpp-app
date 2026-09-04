@@ -189,17 +189,20 @@ bin\Release\App.exe
 
 ## 现成脚本
 
+仓库脚本使用 Pipenv 管理环境。首次使用前请安装 Pipenv，并在仓库根目录执行 `pipenv install --dev --deploy`。
+
 ### 构建 C# 开发版本
 
 ```bash
-python build-dotnet.py
+pipenv install --dev --deploy
+pipenv run build
 ```
 
 ### 读取或更新版本
 
 ```bash
-python version.py
-python version.py --update 0.1.9
+pipenv run version
+pipenv run version --update 0.1.9
 ```
 
 无参数时输出 `crt-cpp-app.csproj` 的 `Version`。`--update` 仅接受三段或四段数字版本号，并会同步更新 `Version`、`AssemblyVersion`、`FileVersion` 和 `InformationalVersion`。
@@ -207,7 +210,7 @@ python version.py --update 0.1.9
 ### 测试脚本
 
 ```bash
-python test.py
+pipenv run test
 ```
 
 执行后，会自动运行当前仓库中的单元测试（基于 `dotnet test`）。测试在系统临时目录中创建独占的随机目录，并在完成后清理；它不会删除仓库内的用户文件。
@@ -215,7 +218,7 @@ python test.py
 ### 打包脚本
 
 ```bash
-python archive.py --zip
+pipenv run archive --zip
 ```
 
 默认输出为文件夹归档。`--zip` 生成自包含程序的 ZIP 发布包，`--python` 生成可通过 pip 安装的 platform wheel，`--nuget` 生成 NuGet 包，`--nodejs` 生成 npm 包；`--all` 同时生成四者。所有产物均写入 `dist/`。
@@ -241,23 +244,25 @@ python src/install.py --source dist/<archive-folder>
 ### 清理脚本
 
 ```bash
-python clean.py
+pipenv run clean
 ```
 
 清理工具与测试项目的 `obj/` 目录、共享的 `bin/` 构建产物，以及系统临时目录中以 `crt-cpp-app-` 开头的残留目录（包括测试和发布过程的临时文件）。如果需要额外清理 `dist`：
 
 ```bash
-python clean.py --dist
+pipenv run clean --include-dist-dir
 ```
 
 ## 本项目自身结构
 
 ```text
 crt-cpp-app/
-├── build-dotnet.py               # 构建 C# 开发版本
-├── test.py                      # 运行单元测试
-├── archive.py                   # 创建发布归档
-├── clean.py                     # 清理中间产物
+├── scripts/
+│   ├── build.py                 # 构建 C# 开发版本
+│   ├── test.py                  # 运行单元测试
+│   ├── archive.py               # 创建发布归档
+│   ├── clean.py                 # 清理中间产物
+│   └── version.py               # 读取或更新版本
 ├── pyproject.toml                # Python 包构建配置
 ├── setup.py                      # 构建时发布并内嵌 C# CLI
 ├── python/crt_cpp_app/           # pip 安装后的 Python 启动器
@@ -281,7 +286,7 @@ crt-cpp-app/
 ## 开发与测试
 
 ```bash
-python test.py
+pipenv run test
 ```
 
 测试逻辑会：

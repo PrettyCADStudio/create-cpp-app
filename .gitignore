@@ -69,3 +69,4 @@ nunit-*.xml
 *.whl
 __pycache__/
 .venv/
+.idea/

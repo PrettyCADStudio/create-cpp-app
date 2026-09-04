@@ -35,15 +35,23 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+
+      - name: Setup Pipenv
+        run: |
+          python -m pip install --upgrade pipenv
+          pipenv install --dev --deploy
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
 
+      - name: Verify project version metadata
+        run: pipenv run version --verify
+
       - name: Build release packages
-        run: python archive.py --zip --python --nodejs
+        run: pipenv run archive --zip --python --nodejs
 
       - name: Upload ZIP packages
         uses: actions/upload-artifact@v4
@@ -122,12 +130,17 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+
+      - name: Setup Pipenv
+        run: |
+          python -m pip install --upgrade pipenv
+          pipenv install --dev --deploy
 
       - name: Verify tag matches Python package version
         shell: bash
         run: |
-          package_version="$(python setup.py --version)"
+          package_version="$(pipenv run version)"
           tag_version="${GITHUB_REF_NAME#v}"
           if [ "$package_version" != "$tag_version" ]; then
             echo "::error::Tag $GITHUB_REF_NAME does not match Python package version $package_version."

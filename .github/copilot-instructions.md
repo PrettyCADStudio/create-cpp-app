@@ -5,14 +5,16 @@
 Use the repository scripts for normal validation:
 
 ```bash
+pipenv install --dev --deploy
+
 # Build the C# CLI (Release by default)
-python build-dotnet.py
+pipenv run build
 
 # Build the CLI in Debug
-python build-dotnet.py --config Debug
+pipenv run build --config Debug
 
 # Run every fixture-based test
-python test.py
+pipenv run test
 
 # Run all fixture cases through the core theory
 dotnet test crt-cpp-app.slnx --filter "Create_MatchesFixture"

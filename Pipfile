@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
+
+[scripts]
+build = "python scripts/build.py"
+archive = "python scripts/archive.py"
+zip = "python scripts/archive.py --zip"
+python = "python scripts/archive.py --python"
+nuget = "python scripts/archive.py --nuget"
+nodejs = "python scripts/archive.py --nodejs"
+test = "python scripts/test.py"
+version = "python scripts/version.py"
+clean = "python scripts/clean.py"
