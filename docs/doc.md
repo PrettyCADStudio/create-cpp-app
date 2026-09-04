@@ -60,10 +60,10 @@ pip 会将命令入口安装到当前 Python 环境的 scripts 目录；使用�
 通过 npm 安装与当前平台对应的包：
 
 ```bash
-npm install --global @prettycadstudio/crt-cpp-app-win32-x64
+npm install --global @pcads/crt-cpp-app-win32-x64
 ```
 
-包名使用 `@prettycadstudio` scope，并包含目标平台和架构，例如 Windows x64 为 `@prettycadstudio/crt-cpp-app-win32-x64`。安装后可直接使用 `crt-cpp-app`；npm 包同样内嵌自包含的 C# 程序，因此不需要安装 .NET runtime 或 SDK。
+包名使用 `@pcads` scope，并包含目标平台和架构，例如 Windows x64 为 `@pcads/crt-cpp-app-win32-x64`。安装后可直接使用 `crt-cpp-app`；npm 包同样内嵌自包含的 C# 程序，因此不需要安装 .NET runtime 或 SDK。
 
 ## 通过 NuGet 使用
 
@@ -89,7 +89,7 @@ python version.py --update 0.1.9
 
 工作流也会发布 Python wheel 到 PyPI。请在相同页面添加 `PYPI_API_TOKEN` repository secret，其值为 PyPI 的 API token。首次发布前，`crt-cpp-app` 这一 PyPI 项目名必须已由该 token 对应的账号或组织拥有；已有的 wheel 会自动跳过。
 
-工作流还会发布各平台的 npm 包。请添加 `NPM_TOKEN` repository secret，其值为对 `@prettycadstudio` scope 拥有发布权限的 npm automation token，或已启用 **Bypass 2FA** 的 granular access token。普通 token 会触发 `EOTP`，而 CI 无法提供一次性验证码。当前发布的包名为 `@prettycadstudio/crt-cpp-app-win32-x64`、`@prettycadstudio/crt-cpp-app-linux-x64` 和 `@prettycadstudio/crt-cpp-app-darwin-arm64`；已有版本会自动跳过。
+工作流还会发布各平台的 npm 包。请添加 `NPM_TOKEN` repository secret，其值为对 `@pcads` scope 拥有发布权限的 npm automation token，或已启用 **Bypass 2FA** 的 granular access token。普通 token 会触发 `EOTP`，而 CI 无法提供一次性验证码。当前发布的包名为 `@pcads/crt-cpp-app-win32-x64`、`@pcads/crt-cpp-app-linux-x64` 和 `@pcads/crt-cpp-app-darwin-arm64`；已有版本会自动跳过。
 
 ## 创建项目
 

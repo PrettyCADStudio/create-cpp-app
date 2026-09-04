@@ -13,7 +13,7 @@ PROJECT_FILE = os.path.join("src", "crt-cpp-app", "crt-cpp-app.csproj")
 DIST_DIR = "dist"
 DOCUMENTATION_FILE = os.path.join("docs", "doc.md")
 APPLICATION_NAME = "crt-cpp-app"
-NPM_PACKAGE_SCOPE = "@prettycadstudio"
+NPM_PACKAGE_SCOPE = "@pcads"
 NODE_LAUNCHER = os.path.join("nodejs", "crt-cpp-app.js")
 
 
