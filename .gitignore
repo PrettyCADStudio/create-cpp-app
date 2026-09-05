@@ -65,6 +65,8 @@ nunit-*.xml
 
 # Python packaging
 /build/
+/python/build/
+/python/dist/
 *.egg-info/
 *.whl
 __pycache__/

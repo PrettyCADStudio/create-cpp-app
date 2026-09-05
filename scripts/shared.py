@@ -34,6 +34,12 @@ def get_dist_dir() -> Path:
 def get_build_dir() -> Path:
     return get_repo_dir() / "build"
 
+def get_python_dir() -> Path:
+    return get_repo_dir() / "python"
+
+def get_nodejs_dir() -> Path:
+    return get_repo_dir() / "nodejs"
+
 def get_sln_file() -> Path:
     return get_repo_dir() / f"{APPLICATION_NAME}.slnx"
 

@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 
 [dev-packages]
+setuptools = ">=77"
+wheel = ">=0.45"
+build = ">=1.2"
 
 [requires]
 python_version = "3.12"

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 from __future__ import annotations
 
 import platform
@@ -10,7 +12,8 @@ from setuptools.command.bdist_wheel import bdist_wheel as _bdist_wheel
 from setuptools.command.build_py import build_py as _build_py
 
 
-ROOT = Path(__file__).parent.resolve()
+PYTHON_ROOT = Path(__file__).parent.resolve()
+ROOT = PYTHON_ROOT.parent
 PROJECT_FILE = ROOT / "src" / "crt-cpp-app" / "crt-cpp-app.csproj"
 PACKAGE_NAME = "crt_cpp_app"
 
@@ -65,9 +68,6 @@ class BDistWheel(_bdist_wheel):
 
     def get_tag(self):
         _, _, platform_tag = super().get_tag()
-        # PyPI rejects the generic ``linux_<architecture>`` tag.  The bundled
-        # self-contained .NET application supports the manylinux 2.17 glibc
-        # baseline, so advertise that compatible platform tag instead.
         if platform.system() == "Linux" and platform_tag.startswith("linux_"):
             architecture = platform_tag.removeprefix("linux_")
             platform_tag = f"manylinux_2_17_{architecture}"
@@ -89,8 +89,8 @@ setup(
     long_description_content_type="text/markdown",
     license="MIT",
     python_requires=">=3.9",
-    packages=find_packages("python"),
-    package_dir={"": "python"},
+    packages=find_packages(str(PYTHON_ROOT)),
+    package_dir={"": str(PYTHON_ROOT)},
     entry_points={"console_scripts": ["crt-cpp-app=crt_cpp_app.cli:main"]},
     cmdclass={"build_py": BuildPy, "bdist_wheel": BDistWheel},
     distclass=BinaryDistribution,

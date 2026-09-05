@@ -6,16 +6,25 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
-from shared import get_bin_dir, get_build_dir, get_dist_dir, get_proj_dir, get_test_proj_dir, APPLICATION_NAME
+from shared import (
+    get_bin_dir, get_build_dir, get_dist_dir, get_proj_dir, get_test_proj_dir, get_python_dir,
+    APPLICATION_NAME
+)
 
 
 def collect_dirs_to_remove(include_dist_dir: bool) -> Sequence[Path]:
+    python_dir = get_python_dir()
     result = [
         get_bin_dir(),
         get_build_dir(),
         get_proj_dir() / "obj",
         get_test_proj_dir() / "obj",
+        python_dir / "build",
     ]
+
+    for sub in python_dir.iterdir():
+        if sub.is_dir() and sub.name.endswith(".egg-info"):
+            result.append(sub)
 
     if include_dist_dir:
         result.append(get_dist_dir())

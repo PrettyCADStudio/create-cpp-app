@@ -55,7 +55,7 @@ python -m crt_cpp_app
 
 ```bash
 python -m pip install build
-python -m build --wheel
+python -m build --wheel python
 ```
 
 构建过程会发布一个包含自包含 C# 程序的、与当前平台绑定的 wheel 到 `dist/`。
@@ -263,9 +263,10 @@ crt-cpp-app/
 │   ├── archive.py               # 创建发布归档
 │   ├── clean.py                 # 清理中间产物
 │   └── version.py               # 读取或更新版本
-├── pyproject.toml                # Python 包构建配置
-├── setup.py                      # 构建时发布并内嵌 C# CLI
-├── python/crt_cpp_app/           # pip 安装后的 Python 启动器
+├── python/
+│   ├── pyproject.toml            # Python 包构建配置
+│   ├── setup.py                  # 构建时发布并内嵌 C# CLI
+│   └── crt_cpp_app/              # pip 安装后的 Python 启动器
 ├── crt-cpp-app.slnx             # .NET 解决方案文件
 ├── src/
 │   ├── crt-cpp-app/

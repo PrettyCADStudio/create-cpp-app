@@ -109,7 +109,12 @@ def get_python_wheel_filename(version: str, suffix: str) -> str:
 
 
 def archive_python(version, dist_dir: Path) -> Path:
-    args = [sys.executable, "-m", "pip", "wheel", ".", "--wheel-dir", path_to_str(dist_dir), "--no-deps"]
+    python_project_dir = get_repo_dir() / "python"
+    args = [
+        sys.executable, "-m", "pip", "wheel", path_to_str(python_project_dir),
+        "--wheel-dir", path_to_str(dist_dir),
+        "--no-deps"
+    ]
     result = run_command(args)
     if result.returncode != 0:
         raise RuntimeError("Failed to build the Python wheel")
