@@ -20,7 +20,18 @@ from version import read_version_info
 
 
 NPM_PACKAGE_SCOPE: Final[str] = "@pcads"
-DOCUMENTATION_FILE: Final[Path] = get_docs_dir() / "doc.md"
+DOCUMENTATION_FILES: Final[Tuple[Path, ...]] = tuple(
+    get_docs_dir() / name
+    for name in (
+        "title.md",
+        "usage.md",
+        "install-app.md",
+        "install-python-cli.md",
+        "install-nuget-cli.md",
+        "install-nodejs-cli.md",
+        "copyright.md",
+    )
+)
 NODE_LAUNCHER: Final[Path] = get_repo_dir() / "nodejs" / "crt-cpp-app.js"
 
 
@@ -40,12 +51,20 @@ def publish_application(output_dir: Path):
         raise RuntimeError("Failed to publish a self-contained release package")
 
 
-def collect_files(build_dir: Path) -> Sequence[Tuple[Path, Path]]:
+def compose_readme(install_document: str) -> str:
+    document_names = ("title.md", install_document, "usage.md", "copyright.md")
+    return "\n\n".join(
+        (get_docs_dir() / name).read_text(encoding="utf-8").strip()
+        for name in document_names
+    ) + "\n"
+
+
+def collect_files(build_dir: Path, readme_file: Path) -> Sequence[Tuple[Path, Path]]:
     files = []
     for root, _, filenames in os.walk(build_dir):
         root_dir = Path(root)
         for filename in filenames:
-            if filename.endswith(".pdb"):
+            if filename.endswith(".pdb") or filename == "README.md":
                 continue
             file_path = root_dir / filename
             rel_path = file_path.relative_to(build_dir)
@@ -55,7 +74,7 @@ def collect_files(build_dir: Path) -> Sequence[Tuple[Path, Path]]:
     if install_file.is_file():
         files.append((install_file, install_file.name))
 
-    files.append((DOCUMENTATION_FILE, DOCUMENTATION_FILE.name))
+    files.append((readme_file, Path("README.md")))
     return files
 
 
@@ -70,7 +89,9 @@ def archive_zip(version: str, dist_dir: Path) -> Path:
     with tempfile.TemporaryDirectory(prefix=prefix) as publish_dir_str:
         publish_dir = Path(publish_dir_str)
         publish_application(publish_dir)
-        files = collect_files(publish_dir)
+        readme_file = publish_dir / "README.md"
+        readme_file.write_text(compose_readme("install-app.md"), encoding="utf-8")
+        files = collect_files(publish_dir, readme_file)
 
         name = get_zip_filename(version)
         zip_file = dist_dir / f"{name}.zip"
@@ -88,7 +109,9 @@ def archive_folder(version: str, dist_dir: Path) -> Path:
     with tempfile.TemporaryDirectory(prefix=prefix) as publish_dir_str:
         publish_dir = Path(publish_dir_str)
         publish_application(publish_dir)
-        files = collect_files(publish_dir)
+        readme_file = publish_dir / "README.md"
+        readme_file.write_text(compose_readme("install-app.md"), encoding="utf-8")
+        files = collect_files(publish_dir, readme_file)
 
         name = get_zip_filename(version)
         folder_path = dist_dir / name
@@ -131,8 +154,20 @@ def archive_python(version, dist_dir: Path) -> Path:
 
 def archive_nuget(version: str, dist_dir: Path) -> Path:
     proj_file = get_proj_file()
-    args = ["dotnet", "pack", path_to_str(proj_file), "-c", "Release", "--output", path_to_str(dist_dir)]
-    result = run_command(args)
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".md", prefix=".crt-cpp-app-readme-", encoding="utf-8",
+        dir=proj_file.parent, delete=False,
+    ) as readme:
+        readme.write(compose_readme("install-nuget-cli.md"))
+        readme_path = Path(readme.name)
+    args = [
+        "dotnet", "pack", path_to_str(proj_file), "-c", "Release", "--output", path_to_str(dist_dir),
+        "-p:PackageReadmeSource=" + path_to_str(readme_path),
+    ]
+    try:
+        result = run_command(args)
+    finally:
+        readme_path.unlink(missing_ok=True)
     if result.returncode != 0:
         raise RuntimeError("Failed to build the NuGet package")
 
@@ -174,6 +209,8 @@ def archive_nodejs(version, dist_dir: Path) -> Path:
             shutil.copytree(publish_dir, app_dir, ignore=shutil.ignore_patterns("*.pdb"))
         os.makedirs(bin_dir)
         shutil.copy2(NODE_LAUNCHER, os.path.join(bin_dir, "crt-cpp-app.js"))
+        with open(os.path.join(package_dir, "README.md"), "w", encoding="utf-8", newline="\n") as readme_file:
+            readme_file.write(compose_readme("install-nodejs-cli.md"))
 
         package_json = {
             "name": package_name,
@@ -183,7 +220,7 @@ def archive_nodejs(version, dist_dir: Path) -> Path:
             "os": [node_platform],
             "cpu": [architecture],
             "bin": {APPLICATION_NAME: "bin/crt-cpp-app.js"},
-            "files": ["app/", "bin/"],
+            "files": ["app/", "bin/", "README.md"],
         }
         with open(os.path.join(package_dir, "package.json"), "w", encoding="utf-8", newline="\n") as package_file:
             json.dump(package_json, package_file, indent=2)
@@ -247,12 +284,13 @@ def main():
     create_nodejs = args.nodejs or args.all
     create_folder = not create_zip and not create_python and not create_nuget and not create_nodejs
 
-    if (create_zip or create_folder) and not os.path.isfile(DOCUMENTATION_FILE):
-        print(
-            f"Error: documentation file not found at {DOCUMENTATION_FILE}",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    if create_zip or create_folder:
+        missing_documentation = [path for path in DOCUMENTATION_FILES if not path.is_file()]
+        if missing_documentation:
+            print("Error: documentation file(s) not found:", file=sys.stderr)
+            for path in missing_documentation:
+                print(f"  - {path}", file=sys.stderr)
+            sys.exit(1)
 
     dist_dir = get_dist_dir()
     os.makedirs(dist_dir, exist_ok=True)

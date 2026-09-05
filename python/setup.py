@@ -18,6 +18,14 @@ PROJECT_FILE = ROOT / "src" / "crt-cpp-app" / "crt-cpp-app.csproj"
 PACKAGE_NAME = "crt_cpp_app"
 
 
+def read_readme() -> str:
+    document_names = ("title.md", "install-python-cli.md", "usage.md", "copyright.md")
+    return "\n\n".join(
+        (ROOT / "docs" / name).read_text(encoding="utf-8").strip()
+        for name in document_names
+    ) + "\n"
+
+
 def read_version() -> str:
     root = ET.parse(PROJECT_FILE).getroot()
     version = root.findtext(".//Version")
@@ -85,7 +93,7 @@ setup(
     name="crt-cpp-app",
     version=read_version(),
     description="Create a C++ CMake project from the command line",
-    long_description=(ROOT / "README.md").read_text(encoding="utf-8"),
+    long_description=read_readme(),
     long_description_content_type="text/markdown",
     license="MIT",
     python_requires=">=3.9",

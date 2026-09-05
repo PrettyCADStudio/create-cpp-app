@@ -25,7 +25,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="README.md" Condition="'$(PackageReadmeSource)' == ''" />
+    <None Include="$(PackageReadmeSource)" Link="README.md" Pack="true" PackagePath="README.md" Condition="'$(PackageReadmeSource)' != ''" />
   </ItemGroup>
 
 </Project>
