@@ -16,6 +16,8 @@ PYTHON_ROOT = Path(__file__).parent.resolve()
 ROOT = PYTHON_ROOT.parent
 PROJECT_FILE = ROOT / "src" / "crt-cpp-app" / "crt-cpp-app.csproj"
 PACKAGE_NAME = "crt_cpp_app"
+PROJECT_URL = "https://github.com/PrettyCADStudio/crt-cpp-app"
+ISSUES_URL = f"{PROJECT_URL}/issues"
 
 
 def read_readme() -> str:
@@ -96,6 +98,9 @@ setup(
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     license="MIT",
+    url=PROJECT_URL,
+    project_urls={"Repository": PROJECT_URL, "Issues": ISSUES_URL},
+    keywords="cpp c++ cmake project scaffolding cli",
     python_requires=">=3.9",
     packages=find_packages(str(PYTHON_ROOT)),
     package_dir={"": str(PYTHON_ROOT)},

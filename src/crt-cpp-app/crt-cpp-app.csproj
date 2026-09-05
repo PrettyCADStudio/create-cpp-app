@@ -13,6 +13,12 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <PackageId>crt-cpp-app</PackageId>
     <PackageDescription>Create a C++ CMake project from the command line</PackageDescription>
+    <PackageProjectUrl>https://github.com/PrettyCADStudio/crt-cpp-app</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/PrettyCADStudio/crt-cpp-app</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>cpp;c++;cmake;project;scaffolding;cli</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReleaseNotes>Report issues at https://github.com/PrettyCADStudio/crt-cpp-app/issues</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>crt-cpp-app</ToolCommandName>

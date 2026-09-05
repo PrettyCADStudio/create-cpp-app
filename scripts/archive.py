@@ -20,6 +20,9 @@ from version import read_version_info
 
 
 NPM_PACKAGE_SCOPE: Final[str] = "@pcads"
+PROJECT_URL: Final[str] = "https://github.com/PrettyCADStudio/crt-cpp-app"
+ISSUES_URL: Final[str] = f"{PROJECT_URL}/issues"
+PACKAGE_KEYWORDS: Final[Tuple[str, ...]] = ("cpp", "c++", "cmake", "project", "scaffolding", "cli")
 DOCUMENTATION_FILES: Final[Tuple[Path, ...]] = tuple(
     get_docs_dir() / name
     for name in (
@@ -217,6 +220,10 @@ def archive_nodejs(version, dist_dir: Path) -> Path:
             "version": version,
             "description": "Create a C++ CMake project from the command line",
             "license": "MIT",
+            "homepage": PROJECT_URL,
+            "bugs": {"url": ISSUES_URL},
+            "repository": {"type": "git", "url": f"git+{PROJECT_URL}.git"},
+            "keywords": list(PACKAGE_KEYWORDS),
             "os": [node_platform],
             "cpu": [architecture],
             "bin": {APPLICATION_NAME: "bin/crt-cpp-app.js"},
